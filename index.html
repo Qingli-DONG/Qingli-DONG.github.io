@@ -3,238 +3,53 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>董庆黎 · 个人主页 | Qingli Dong · Homepage</title>
-  <meta name="description" content="董庆黎的个人主页 —— 暨南大学经济学本科生，研究方向：中国企业出海与对外直接投资（OFDI）">
+  <title>董庆黎 · MHE 学习笔记</title>
+  <meta name="description" content="董庆黎的 MHE 学习笔记 —— 《Mostly Harmless Econometrics》第 3、4 章">
   <!-- 网页小图标（emoji 版，无需额外图片文件） -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📖</text></svg>">
   <link rel="stylesheet" href="style.css">
 </head>
 <body id="top">
 
-  <!-- ==================== 顶部导航栏 ==================== -->
-  <nav class="navbar">
-    <div class="container nav-inner">
-      <a class="nav-brand" href="#top">董庆黎 <span class="nav-brand-en">Qingli Dong</span></a>
-      <div class="nav-links">
-        <a href="#about">关于我</a>
-        <a href="#research">研究方向</a>
-        <a href="#projects">研究项目</a>
-        <a href="#skills">技能</a>
-        <a href="#contact">联系</a>
-      </div>
-    </div>
-  </nav>
-
-  <!-- ==================== 首屏 Hero ==================== -->
+  <!-- ==================== 首屏：只留名字 ==================== -->
   <header class="hero">
     <div class="container hero-inner">
-      <!-- 头像占位：圆圈内一个"董"字，之后可换成真实照片 -->
       <div class="hero-avatar">董</div>
-      <p class="hero-label">JINAN UNIVERSITY · UNDERGRADUATE IN ECONOMICS</p>
       <h1 class="hero-name">董庆黎 <span class="hero-name-en">Qingli Dong</span></h1>
-      <p class="hero-title">暨南大学 · 经济学本科</p>
-      <p class="hero-desc">
-        研究中国企业出海与对外直接投资（OFDI），<br>
-        关注贸易政策—企业行为—全球资源配置的微观证据链
-      </p>
-      <div class="hero-buttons">
-        <a class="btn btn-primary" href="https://github.com/Qingli-DONG" target="_blank" rel="noopener">GitHub</a>
-        <a class="btn btn-ghost" href="mailto:Humphrey_DONG.Qingli@outlook.com">联系我</a>
-      </div>
+      <p class="hero-desc">《Mostly Harmless Econometrics》学习笔记</p>
     </div>
   </header>
 
-  <!-- ==================== 关于我 ==================== -->
-  <section id="about" class="section">
+  <!-- ==================== 学习笔记 ==================== -->
+  <section id="notes" class="section">
     <div class="container">
       <div class="section-title">
-        <p class="section-label">ABOUT ME</p>
-        <h2>关于我</h2>
-      </div>
-      <div class="about-text">
-        <p>
-          我是暨南大学经济学专业本科生。我的研究兴趣集中在国际贸易与中国企业出海：
-          企业为何走出去、如何走出去、走出去之后如何在全球配置资源。
-        </p>
-        <p>
-          目前我正基于 1978—2024 年中国海关出口企业匹配面板数据（分析样本自 1990 年起），
-          运用多期双重差分法（DID）研究美国 301 调查对中国企业对外直接投资（OFDI）的影响，
-          覆盖基准回归、平行趋势检验、稳健性检验、机制分析与异质性分析。
-        </p>
-        <p>
-          我重视研究的可复现性，遵循「可理解性、可追溯性、可复现性」的数据与代码管理原则，
-          并积极将 AI 工具（Claude Code 等）融入实证研究工作流。
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ==================== 研究方向 ==================== -->
-  <section id="research" class="section section-alt">
-    <div class="container">
-      <div class="section-title">
-        <p class="section-label">RESEARCH INTERESTS</p>
-        <h2>研究方向</h2>
+        <p class="section-label">NOTES</p>
+        <h2>学习笔记</h2>
       </div>
       <div class="card-grid">
+        <!-- 第3章笔记 -->
         <div class="card">
-          <div class="card-icon">🌏</div>
-          <h3>企业出海与 OFDI</h3>
-          <p>中国企业的对外直接投资：动因、区位选择与全球资源配置绩效</p>
+          <div class="card-icon">📖</div>
+          <h3>第 3 章 · 回归的基本原理</h3>
+          <p>回归与因果关系、异质性与非线性、回归的细节（含附录推导）</p>
+          <a class="project-link" href="notes/MHE_第3章_笔记.html">阅读笔记 →</a>
         </div>
+        <!-- 第4章笔记 -->
         <div class="card">
-          <div class="card-icon">📈</div>
-          <h3>贸易政策评估</h3>
-          <p>关税摩擦、贸易救济与 301 调查对中国企业行为的微观效应</p>
-        </div>
-        <div class="card">
-          <div class="card-icon">🗂️</div>
-          <h3>海关微观数据</h3>
-          <p>中国海关进出口匹配面板数据的清洗、匹配与实证应用</p>
-        </div>
-        <div class="card">
-          <div class="card-icon">🧪</div>
-          <h3>因果推断方法</h3>
-          <p>多期 DID、事件研究法及其稳健性诊断（如 Bacon 分解）</p>
+          <div class="card-icon">🧰</div>
+          <h3>第 4 章 · 工具变量回归</h3>
+          <p>工具变量与因果关系、两阶段最小二乘、双样本 IV、LATE 及其推广（含附录）</p>
+          <a class="project-link" href="notes/MHE_第4章_笔记.html">阅读笔记 →</a>
         </div>
       </div>
-    </div>
-  </section>
-
-  <!-- ==================== 研究项目 ==================== -->
-  <section id="projects" class="section">
-    <div class="container">
-      <div class="section-title">
-        <p class="section-label">PROJECTS</p>
-        <h2>研究项目</h2>
-      </div>
-      <div class="project-list">
-
-        <!-- 项目一：核心实证课题 -->
-        <div class="project-card">
-          <div class="project-head">
-            <h3>301 调查与中国企业 OFDI 实证研究</h3>
-            <span class="project-badge">核心课题</span>
-          </div>
-          <p>
-            基于 1978—2024 年中国海关出口企业匹配面板数据，运用多期双重差分法识别
-            美国 301 调查对中国企业对外直接投资的影响，完整覆盖基准回归、
-            平行趋势检验（事件研究法）、稳健性检验、机制分析与异质性分析。
-          </p>
-          <div class="project-tags">
-            <span class="tag">Stata</span>
-            <span class="tag">reghdfe</span>
-            <span class="tag">多期DID</span>
-            <span class="tag">事件研究法</span>
-          </div>
-          <!-- 待上线：项目仓库建好后把链接替换为真实仓库地址 -->
-          <a class="project-link" href="https://github.com/Qingli-DONG" target="_blank" rel="noopener">查看项目 →</a>
-        </div>
-
-        <!-- 项目二：课本转录与学习笔记 -->
-        <div class="project-card">
-          <div class="project-head">
-            <h3>MHE 计量经济学课本转录与学习笔记</h3>
-            <span class="project-badge project-badge-light">学习笔记</span>
-          </div>
-          <p>
-            以 GLM-OCR 整页识别 + 逐字核验的工作流，将《Mostly Harmless Econometrics》
-            逐页转录为结构化 Markdown 笔记，沉淀计量方法学习资料。
-          </p>
-          <div class="project-tags">
-            <span class="tag">Python</span>
-            <span class="tag">OCR</span>
-            <span class="tag">Markdown</span>
-          </div>
-          <!-- 待上线：项目仓库建好后把链接替换为真实仓库地址 -->
-          <a class="project-link" href="https://github.com/Qingli-DONG" target="_blank" rel="noopener">查看项目 →</a>
-        </div>
-
-        <!-- 项目三：数据与代码管理规范 -->
-        <div class="project-card">
-          <div class="project-head">
-            <h3>实证研究代码管理规范实践</h3>
-            <span class="project-badge project-badge-light">工作流</span>
-          </div>
-          <p>
-            遵循「可理解性、可追溯性、可复现性」三大原则，规范 Stata 项目组织：
-            原始数据只读、代码生成中间数据、输出与图表分目录管理、全程日志留痕。
-          </p>
-          <div class="project-tags">
-            <span class="tag">Stata</span>
-            <span class="tag">数据管理</span>
-            <span class="tag">可复现研究</span>
-          </div>
-          <!-- 待上线：项目仓库建好后把链接替换为真实仓库地址 -->
-          <a class="project-link" href="https://github.com/Qingli-DONG" target="_blank" rel="noopener">查看项目 →</a>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- ==================== 技能 ==================== -->
-  <section id="skills" class="section section-alt">
-    <div class="container">
-      <div class="section-title">
-        <p class="section-label">SKILLS</p>
-        <h2>技能</h2>
-      </div>
-      <div class="skill-grid">
-        <div class="skill-group">
-          <h3>📐 计量方法</h3>
-          <div class="skill-tags">
-            <span class="tag">Stata</span>
-            <span class="tag">reghdfe 高维固定效应</span>
-            <span class="tag">多期 DID</span>
-            <span class="tag">事件研究法</span>
-            <span class="tag">平行趋势检验</span>
-            <span class="tag">稳健性诊断</span>
-          </div>
-        </div>
-        <div class="skill-group">
-          <h3>💻 编程与工具</h3>
-          <div class="skill-tags">
-            <span class="tag">Python</span>
-            <span class="tag">Git &amp; GitHub</span>
-            <span class="tag">VS Code</span>
-            <span class="tag">Claude Code</span>
-            <span class="tag">飞书</span>
-          </div>
-        </div>
-        <div class="skill-group">
-          <h3>📊 数据工作</h3>
-          <div class="skill-tags">
-            <span class="tag">海关微观数据</span>
-            <span class="tag">面板数据清洗</span>
-            <span class="tag">数据可视化</span>
-            <span class="tag">PDF/OCR 自动化</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ==================== 联系 ==================== -->
-  <section id="contact" class="section">
-    <div class="container contact-inner">
-      <div class="section-title">
-        <p class="section-label">CONTACT</p>
-        <h2>联系</h2>
-      </div>
-      <p class="contact-text">欢迎交流企业出海、贸易政策评估与实证方法相关问题</p>
-      <div class="contact-buttons">
-        <a class="btn btn-solid" href="https://github.com/Qingli-DONG" target="_blank" rel="noopener">GitHub</a>
-        <a class="btn btn-outline" href="mailto:Humphrey_DONG.Qingli@outlook.com">发送邮件</a>
-      </div>
-      <p class="contact-note">暨南大学 · 广州</p>
     </div>
   </section>
 
   <!-- ==================== 页脚 ==================== -->
   <footer class="footer">
     <div class="container">
-      <p>© 2026 董庆黎 · 暨南大学 | Powered by GitHub Pages</p>
+      <p>© 2026 董庆黎 · Qingli Dong</p>
     </div>
   </footer>
 

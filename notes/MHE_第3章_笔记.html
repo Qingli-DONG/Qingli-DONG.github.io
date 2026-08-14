@@ -1,0 +1,2189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MHE 笔记 第3章 全 — 回归的基本原理</title>
+
+  <!-- MathJax 3 配置 -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        tags: 'ams',
+        equationNumbers: { autoNumber: 'AMS' }
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+      },
+      svg: {
+        fontCache: 'global',
+        scale: 0.95
+      },
+      chtml: {
+        displayAlign: 'center',
+        displayIndent: '0'
+      }
+    };
+  </script>
+  <!-- MathJax：本地文件优先（保证渲染），CDN链回退 -->
+  <script src="../mathjax-es5/tex-svg.js"
+          onerror="this.onerror=null;var s=document.createElement('script');s.src='https://cdn.bootcdn.net/ajax/libs/mathjax/3.2.2/es5/tex-svg.js';s.onerror=function(){this.onerror=null;var s2=document.createElement('script');s2.src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js';document.head.appendChild(s2);};document.head.appendChild(s);">
+  </script>
+
+  <style>
+    /* ===== LaTeX.css 学术论文风格 ===== */
+    * { box-sizing: border-box; }
+
+    html {
+      font-size: 19px;
+      -webkit-font-smoothing: antialiased;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      max-width: 960px;
+      margin: 60px auto;
+      padding: 0 36px;
+      font-family: "Latin Modern", "CMU Serif", "Computer Modern", "Noto Serif CJK SC", "Times New Roman", "Microsoft YaHei", serif;
+      line-height: 1.8;
+      color: #1a1a1a;
+      background: #fefefe;
+    }
+
+    /* ===== 目录导航 ===== */
+    nav.toc {
+      background: #fafafa;
+      border: 1px solid #e0e0e0;
+      padding: 1em 1.3em;
+      margin: 1.5em 0;
+      font-size: 0.9em;
+    }
+    nav.toc h3 {
+      margin: 0 0 0.5em 0;
+      font-size: 0.95em;
+      color: #555;
+    }
+    nav.toc ol {
+      list-style: none;
+      padding-left: 0;
+      margin: 0;
+    }
+    nav.toc li {
+      margin: 0.25em 0;
+    }
+    nav.toc a {
+      color: #444;
+      text-decoration: none;
+      border-bottom: 1px dotted #ccc;
+    }
+    nav.toc a:hover {
+      color: #000;
+      border-bottom-color: #666;
+    }
+    nav.toc .toc-l2 {
+      padding-left: 1.2em;
+      font-size: 0.93em;
+    }
+    nav.toc .toc-l3 {
+      padding-left: 2.4em;
+      font-size: 0.88em;
+      color: #777;
+    }
+    .back-to-toc {
+      display: inline-block;
+      font-size: 0.75em;
+      color: #999;
+      text-decoration: none;
+      margin-left: 0.5em;
+      font-weight: 400;
+    }
+    .back-to-toc:hover { color: #333; }
+
+    /* ===== 标题区 ===== */
+    .title-block {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .title-block .doctype {
+      font-size: 0.75em;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: #555;
+      margin-bottom: 12px;
+    }
+    .title-block h1 {
+      font-size: 2.1em;
+      font-weight: 500;
+      line-height: 1.3;
+      margin: 0;
+      color: #111;
+    }
+    .title-block .authors {
+      font-size: 0.95em;
+      color: #444;
+      margin-top: 14px;
+    }
+    .title-block .affil {
+      font-size: 0.8em;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    hr.title-sep {
+      border: none;
+      border-top: 1px solid #ccc;
+      margin: 24px auto;
+    }
+
+    /* ===== 摘要 ===== */
+    .abstract-block {
+      margin: 20px 0;
+      padding: 16px 20px;
+      font-size: 0.92em;
+      color: #555;
+      border-left: 3px solid #bbb;
+    }
+    .abstract-block strong { color: #333; }
+
+    /* ===== 标题层级 ===== */
+    h2 {
+      font-size: 1.25em;
+      font-weight: 600;
+      margin: 2.2em 0 0.5em;
+      color: #111;
+      counter-increment: section;
+    }
+    h2::before {
+      content: counter(section) ".  ";
+      color: #888;
+      font-weight: 400;
+    }
+
+    h3 {
+      font-size: 1em;
+      font-weight: 600;
+      margin: 1.6em 0 0.3em;
+      color: #222;
+    }
+
+    h4 {
+      font-size: 0.92em;
+      font-weight: 600;
+      margin: 1.2em 0 0.3em;
+      color: #333;
+    }
+
+    p {
+      margin: 0.6em 0;
+      text-align: justify;
+    }
+
+    /* ===== 问题树可视化 ===== */
+    .problem-tree {
+      background: #fafafa;
+      border: 1px solid #e0e0e0;
+      padding: 1.2em 1.5em;
+      margin: 1em 0;
+      font-size: 0.92em;
+    }
+    .problem-tree .root-q {
+      font-weight: 700;
+      color: #111;
+      margin-bottom: 0.8em;
+      font-size: 1.05em;
+    }
+    .problem-tree .tree-list {
+      padding-left: 1.5em;
+      border-left: 2px solid #ddd;
+      list-style: none;
+      margin: 0;
+    }
+    .problem-tree .tree-list li {
+      margin: 0.4em 0;
+      padding-left: 1em;
+      position: relative;
+    }
+    .problem-tree .tree-list li::before {
+      content: "├─";
+      position: absolute;
+      left: -0.8em;
+      color: #aaa;
+    }
+    .problem-tree .tree-list li:last-child::before {
+      content: "└─";
+    }
+    .problem-tree .tree-list .tree-sublist {
+      padding-left: 1.2em;
+      border-left: 1px dotted #ddd;
+      list-style: none;
+      margin: 0.2em 0;
+    }
+    .problem-tree .tree-sublist li {
+      font-size: 0.93em;
+    }
+    .problem-tree .tree-sublist li::before {
+      content: "└─";
+    }
+    .problem-tree a {
+      color: #444;
+      text-decoration: none;
+    }
+    .problem-tree a:hover {
+      color: #000;
+      text-decoration: underline;
+    }
+
+    /* ===== 子问题关系总结 ===== */
+    .subq-relation {
+      margin: 0.8em 0;
+      padding: 0.6em 1em;
+      font-size: 0.9em;
+      color: #555;
+      background: #fafafa;
+      border-left: 2px solid #bbb;
+      font-style: italic;
+    }
+
+    /* ===== 步骤标签 ===== */
+    .step-label {
+      display: inline-block;
+      font-size: 0.78em;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-right: 6px;
+    }
+    .step-label.q { color: #1a56db; }
+    .step-label.why { color: #c62828; }
+    .step-label.what { color: #2e7d32; }
+    .step-label.conclusion { color: #6a1b9a; }
+    .step-label.skeleton { color: #e65100; }
+    .step-label.significance { color: #37474f; }
+
+    /* ===== 做了什么（What）三子块 ===== */
+    .what-block {
+      margin: 0.6em 0 1em 0;
+    }
+    .what-block .wb-item {
+      margin: 0.5em 0;
+      padding: 0.5em 0.9em;
+      font-size: 0.9em;
+    }
+    .what-block .wb-label {
+      font-weight: 700;
+      font-size: 0.82em;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.2em;
+    }
+    .what-block .operation {
+      background: #f6f9f6;
+      border-left: 3px solid #4caf50;
+    }
+    .what-block .operation .wb-label { color: #2e7d32; }
+    .what-block .argument {
+      background: #fefefe;
+      border-left: 3px solid #555;
+    }
+    .what-block .argument .wb-label { color: #333; }
+    .what-block .argument .arg-qa {
+      margin: 1em 0;
+    }
+    .what-block .argument .arg-q {
+      margin: 0.3em 0;
+      color: #111;
+      font-weight: 700;
+    }
+    .what-block .argument .arg-q::before {
+      content: "❓ ";
+      color: #888;
+    }
+    .what-block .points {
+      background: #f5f8fd;
+      border-left: 3px solid #5c6bc0;
+    }
+    .what-block .points .wb-label { color: #3f51b5; }
+
+    /* ===== 逻辑骨架 ===== */
+    .skeleton-box {
+      margin: 1em 0;
+      padding: 1em 1.3em;
+      background: #fffdf5;
+      border: 1px solid #e6d88c;
+      font-size: 0.9em;
+    }
+    .skeleton-box h4 {
+      margin: 0 0 0.6em 0;
+      font-size: 0.88em;
+      color: #b45309;
+    }
+    .skeleton-box .sk-item {
+      margin: 0.4em 0;
+      padding-left: 0.5em;
+    }
+    .skeleton-box .sk-label {
+      font-weight: 600;
+      color: #333;
+      font-size: 0.85em;
+    }
+    .skeleton-box .sk-content {
+      color: #555;
+    }
+    .skeleton-box .fragile {
+      background: #fff0f0;
+      border-left: 3px solid #e53935;
+      padding: 0.5em 0.8em;
+      margin-top: 0.7em;
+      font-size: 0.88em;
+    }
+    .skeleton-box .fragile .fragile-label {
+      font-weight: 700;
+      color: #c62828;
+    }
+
+    /* ===== 表格 ===== */
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1em 0;
+      font-size: 0.88em;
+    }
+    th {
+      font-weight: 600;
+      text-align: left;
+      border-bottom: 2px solid #333;
+      padding: 0.45em 0.5em;
+      font-size: 0.82em;
+    }
+    td {
+      padding: 0.45em 0.5em;
+      border-bottom: 1px solid #ddd;
+    }
+
+    /* ===== 代码 ===== */
+    code {
+      font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+      background: #f0f0f0;
+      padding: 1px 5px;
+      border-radius: 2px;
+      font-size: 0.88em;
+      color: #333;
+    }
+    pre {
+      background: #f8f8f8;
+      padding: 0.9em 1.1em;
+      border-radius: 3px;
+      overflow-x: auto;
+      font-size: 0.85em;
+      line-height: 1.55;
+      border: 1px solid #e8e8e8;
+    }
+    pre code { background: none; padding: 0; }
+
+    /* ===== Implications ===== */
+    .implications { margin: 1em 0; }
+    .implications .pair {
+      margin: 1em 0;
+      padding: 0.7em 1em;
+      background: #fafafa;
+      border-left: 3px solid #bbb;
+    }
+    .implications .book-says {
+      font-size: 0.9em;
+      color: #555;
+      margin-bottom: 0.3em;
+    }
+    .implications .book-says::before { content: "Text: "; font-weight: 600; color: #333; }
+    .implications .for-you {
+      font-size: 0.9em;
+      color: #444;
+    }
+    .implications .for-you::before { content: "For you: "; font-weight: 600; color: #1a56db; }
+
+    /* ===== Takeaway ===== */
+    .takeaway {
+      background: #fffef5;
+      border: 1px solid #ddd;
+      padding: 0.9em 1.1em;
+      margin: 1em 0;
+      font-size: 0.93em;
+      font-weight: 500;
+    }
+
+    /* ===== 本节小结 ===== */
+    .chapter-summary {
+      background: #f4f8f4;
+      border: 1px solid #cfe3cf;
+      padding: 1em 1.3em;
+      margin: 1em 0;
+      font-size: 0.93em;
+    }
+    .chapter-summary h3 {
+      margin-top: 0;
+      color: #2e7d32;
+    }
+
+    /* ===== Next ===== */
+    .todo-list { list-style: none; padding: 0; font-size: 0.9em; }
+    .todo-list li { margin: 0.3em 0; }
+    .pri-1 { font-weight: 600; color: #333; }
+    .pri-1::before { content: "[!] "; color: #c00; }
+    .pri-2 { color: #555; }
+    .pri-2::before { content: "[ ] "; color: #999; }
+
+    /* ===== 附录引用链接 ===== */
+    .app-ref {
+      font-size: 0.85em;
+      color: #888;
+    }
+    .app-ref a {
+      color: #666;
+      text-decoration: none;
+      border-bottom: 1px dotted #aaa;
+    }
+    .app-ref a:hover { color: #333; }
+
+    /* ===== 附录回链 ===== */
+    .app-back {
+      font-size: 0.75em;
+      color: #999;
+      text-decoration: none;
+      font-weight: 400;
+    }
+    .app-back:hover { color: #333; }
+
+    /* ===== 推导步骤（Appendix用） ===== */
+    .derivation-step {
+      margin: 0.45em 0;
+      padding: 0.5em 0.9em;
+      font-size: 0.89em;
+      color: #555;
+      border-left: 2px solid #ccc;
+    }
+    .derivation-step strong { color: #111; }
+
+    /* ===== 响应式 ===== */
+    @media (max-width: 960px) {
+      html { font-size: 17px; }
+      body { max-width: 100%; padding: 0 24px; }
+    }
+    @media (max-width: 600px) {
+      html { font-size: 16px; }
+      .title-block h1 { font-size: 1.6em; }
+    }
+    @media print {
+      html { font-size: 11pt; }
+      body { background: #fff; }
+    }
+  </style>
+</head>
+<body>
+<!-- 标题区 -->
+<div class="title-block">
+  <div class="doctype">MHE 深度阅读笔记 · 全章合订本</div>
+  <h1>第3章 · 让回归变得有意义</h1>
+  <div class="authors">董庆黎</div>
+  <div class="affil">暨南大学经济学系 · 导师：陈方豪 助理教授 · 2026年8月14日</div>
+</div>
+<hr class="title-sep">
+
+<!-- 摘要 -->
+<div class="abstract-block" id="abstract">
+  <strong>摘要。</strong>本章回答一个贯穿全书的问题：回归凭什么"有意义"？答案分四步建成：先剥离因果，建立回归的纯统计学身份——它是条件期望函数（CEF）的最佳线性近似，其推断只依赖大样本理论（§3.1）；再嫁接因果结构——条件独立假设（CIA）是回归获得因果解释的唯一通行证，遗漏变量偏误公式量化了假设失败的代价，不合格控制变量则划定了控制变量选择的边界（§3.2）；随后撤掉线性与常数效应假设——回归系数在异质性世界里是条件方差加权的平均因果效应，回归、匹配与倾向评分同属一个加权估计族（§3.3）；最后落成操作纪律——不随便加权、不迷信probit/Tobit，并以"回归"一词的命名史提醒读者：描述性规律与因果解释永远是两回事（§3.4）。
+</div>
+
+<!-- 目录（一键跳转：所有锚点全章唯一） -->
+<nav class="toc" id="toc">
+  <h3>📑 Contents</h3>
+  <ol>
+    <li><a href="#chap0">§0 · 全章总问题树</a></li>
+    <li>
+      <a href="#s31-0">§3.1 回归的统计学身份</a>
+      <ol class="toc-l2">
+        <li><a href="#s31-2-1-1">§3.1.1 条件期望函数与三大性质</a></li>
+        <li><a href="#s31-2-1-2">§3.1.2 回归与CEF：解构回归与三个理由</a></li>
+        <li><a href="#s31-2-1-3">§3.1.3 渐进推断与稳健标准误</a></li>
+        <li><a href="#s31-2-1-4">§3.1.4 饱和模型：近似变精确</a></li>
+        <li><a href="#s31-4">§3.1 Implications</a></li>
+        <li><a href="#s31-appendix-a">§3.1 Appendix A</a> · <a href="#s31-appendix-b">Appendix B</a></li>
+      </ol>
+    </li>
+    <li>
+      <a href="#s32-0">§3.2 回归与因果关系</a>
+      <ol class="toc-l2">
+        <li><a href="#s32-2-1-1">§3.2.1 条件独立假设：选择偏误分解</a></li>
+        <li><a href="#s32-2-1-2">§3.2.2 遗漏变量偏误公式</a></li>
+        <li><a href="#s32-2-1-3">§3.2.3 不合格的控制变量</a></li>
+        <li><a href="#s32-4">§3.2 Implications</a></li>
+        <li><a href="#s32-appendix-a">§3.2 Appendix A</a> · <a href="#s32-appendix-b">Appendix B</a></li>
+      </ol>
+    </li>
+    <li>
+      <a href="#s33-0">§3.3 异质性与非线性</a>
+      <ol class="toc-l2">
+        <li><a href="#s33-2-1-1">§3.3.1 回归=方差加权的匹配估计量</a></li>
+        <li><a href="#s33-2-1-2">§3.3.2 倾向评分：降维定理与逆概率加权</a></li>
+        <li><a href="#s33-2-1-3">§3.3.3 回归vs倾向评分：NSW与Lalonde</a></li>
+        <li><a href="#s33-4">§3.3 Implications</a></li>
+        <li><a href="#s33-appendix-a">§3.3 Appendix A</a> · <a href="#s33-appendix-b">Appendix B</a></li>
+      </ol>
+    </li>
+    <li>
+      <a href="#s34-0">§3.4 回归的细节</a>
+      <ol class="toc-l2">
+        <li><a href="#s34-2-1-1">§3.4.1 加权回归：把估计对准总体</a></li>
+        <li><a href="#s34-2-1-2">§3.4.2 有限被解释变量与边际效应</a></li>
+        <li><a href="#s34-2-1-3">§3.4.3 回归为什么叫"回归"</a></li>
+        <li><a href="#s34-4">§3.4 Implications</a></li>
+        <li><a href="#s34-appendix-a">§3.4 Appendix A</a> · <a href="#s34-appendix-b">Appendix B</a></li>
+      </ol>
+    </li>
+    <li><a href="#chap3">§3 · 全章逻辑链</a></li>
+    <li><a href="#chap35">§3.5 · 全章总结</a></li>
+    <li><a href="#chap5">§5 · 全章 Takeaway</a></li>
+    <li><a href="#chap6">§6 · 全章 Next</a></li>
+  </ol>
+</nav>
+
+<!-- 全章总问题树 -->
+<h2 id="chap0">§0 · 全章总问题树 <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<div class="problem-tree">
+  <div class="root-q">全章总问题：回归这个几乎所有经验研究都在用的工具，究竟凭什么"有意义"——它作为统计对象是什么？什么时候能给出因果解释？效应异质时它估计的又是什么？落地操作时哪些细节该守、哪些该弃？</div>
+  <ul class="tree-list">
+    <li><a href="#s31-0">§3.1 回归的统计学身份</a>——抛开因果，回归是什么？（CEF近似+渐进推断+饱和模型）
+      <ul class="tree-sublist">
+        <li><a href="#s31-2-1-1">§3.1.1 CEF三大性质</a> · <a href="#s31-2-1-2">§3.1.2 三理由定理</a> · <a href="#s31-2-1-3">§3.1.3 三明治方差</a> · <a href="#s31-2-1-4">§3.1.4 饱和模型</a></li>
+      </ul>
+    </li>
+    <li><a href="#s32-0">§3.2 回归的因果条件</a>——什么时候系数是因果效应？（CIA+OVB+坏控制）
+      <ul class="tree-sublist">
+        <li><a href="#s32-2-1-1">§3.2.1 CIA</a> · <a href="#s32-2-1-2">§3.2.2 OVB公式</a> · <a href="#s32-2-1-3">§3.2.3 不合格控制变量</a></li>
+      </ul>
+    </li>
+    <li><a href="#s33-0">§3.3 异质性与非线性</a>——效应因人而异时回归估计什么？（方差加权+倾向评分+NSW）
+      <ul class="tree-sublist">
+        <li><a href="#s33-2-1-1">§3.3.1 回归=加权匹配估计量</a> · <a href="#s33-2-1-2">§3.3.2 倾向评分</a> · <a href="#s33-2-1-3">§3.3.3 NSW与Lalonde</a></li>
+      </ul>
+    </li>
+    <li><a href="#s34-0">§3.4 回归的细节</a>——落地操作的三件日常决策（加权/LDV/命名史）
+      <ul class="tree-sublist">
+        <li><a href="#s34-2-1-1">§3.4.1 加权回归</a> · <a href="#s34-2-1-2">§3.4.2 LDV与边际效应</a> · <a href="#s34-2-1-3">§3.4.3 命名史</a></li>
+      </ul>
+    </li>
+  </ul>
+</div>
+<!-- §0 前置定位 -->
+<h2 id="s31-0">§0 · Prelude <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<p>第2章末尾把回归当作计算处理组—对照组均值差的工具，而且处理是随机分配的，系数可以直接读成因果效应。但大多数实证研究用的是观察数据——"在没有随机分配可以利用时，我们未必能对回归估计量赋予一个因果解释"（PDF第33页）。所以本节先做减法：把因果问题整个搁置，考察回归作为纯粹统计工具的普适性质——这些性质与研究者如何解释结果无关。因果解释的条件留给§3.2，本节只回答"回归是什么"。</p>
+
+<!-- §1 总问题树 -->
+<h2 id="s31-1">§1 · The Question <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<div class="problem-tree">
+  <div class="root-q">本节总问题：抛开因果，回归作为一种统计工具究竟是什么——它和条件期望函数（CEF）是什么关系，我们对它的推断又建立在什么之上？</div>
+  <ul class="tree-list">
+    <li><a href="#s31-2-1-1">§3.1.1</a> 用什么概括统计关系：CEF的定义与三大性质
+      <ul class="tree-sublist"><li>先立基准语言——没有CEF，"回归近似什么"就没有对象</li></ul>
+    </li>
+    <li><a href="#s31-2-1-2">§3.1.2</a> 为什么做回归：解构回归公式与三个理由定理
+      <ul class="tree-sublist"><li>回归=CEF的最佳线性近似；每个系数=净化后的二元斜率</li></ul>
+    </li>
+    <li><a href="#s31-2-1-3">§3.1.3</a> 怎么推断总体β：渐进理论与三明治方差
+      <ul class="tree-sublist"><li>样本对象及其分布——稳健标准误是默认而非例外</li></ul>
+    </li>
+    <li><a href="#s31-2-1-4">§3.1.4</a> 近似何时变精确：饱和模型与主效应
+      <ul class="tree-sublist"><li>收掉"CEF何时线性"的悬念，讲透主效应/交互项语法</li></ul>
+    </li>
+  </ul>
+</div>
+
+<!-- §3.1.1 -->
+<h3 id="s31-2-1-1">§3.1.1 条件期望函数与三大性质 <a href="#toc" class="back-to-toc">↑Contents</a></h3>
+
+<p><span class="step-label q">Q</span>
+不谈因果，用什么语言概括两个变量之间的统计关系？</p>
+
+<p><span class="step-label why">Why</span>
+劳动经济学天天面对"教育水平更高的人赚得更多"这类规律——个体状况千变万化，但这条联系仍有相当的预测力（PDF第34页）。这类"系统性随机性"需要一个承载它的数学对象：如果先不定义"统计关系本身"，后面说"回归近似它""回归拟合它"就全都没有对象。而且这个定义必须足够基本——基本到不需要任何线性、因果假设，否则整章的地基就是歪的。</p>
+
+<div class="what-block">
+  <p><span class="step-label what">What</span></p>
+
+  <div class="wb-item operation">
+    <div class="wb-label">Operation</div>
+    这一小节要回答：用什么数学对象概括统计关系？答案是条件期望函数（CEF）。它有三个支撑后续全部论证的性质，全部由迭代期望律推出。讲清楚需要四个子问题：CEF是什么、它长什么样、它有什么性质、这些性质依赖线性吗。
+  </div>
+
+  <div class="wb-item argument">
+    <div class="wb-label">论证过程</div>
+
+    <div class="arg-qa">
+      <p class="arg-q">"教育预测收入"这类规律，用什么数学对象概括？</p>
+      <p>答案是条件期望函数（CEF）：给定协变量 $X_i$（$k\times1$ 维向量）时 $Y_i$ 的期望，记为 $\mathbb{E}[Y_i \mid X_i]$（PDF第34页）。$Y_i$ 连续时它是对条件密度加权的积分，离散时是对条件概率质量函数的加权求和。它概括的是"平均而言"——教育对收入有预测力，说的正是给定教育年限后收入的条件期望随教育上升。一个容易忽略的点：期望是总体概念，样本只是总体的子集——所以先研究总体对象，把"用样本推断总体"推迟到§3.1.3，这就是"总体优先"的用意：在使用数据之前，必须先定义感兴趣的对象。</p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">这个抽象对象长什么样？它真的能捕捉"系统性随机性"吗？</p>
+      <p>能，图3.1给出了它的模样（PDF第35页）。数据是1980年IPUMS公用微观样本中5%的40-49岁白人男性，纵轴是对数周工资、横轴是受教育年限：个体工资散落成一片，但CEF曲线清晰地显示出"多读一年书平均多赚10%"这条规律，图中还标出了教育年限取4、8、12、16这几个关键值时收入的分布。个体差异（随机性）与系统规律（CEF）在这张图里被同时展示出来——CEF的使命就是把"随机发生的个体差异"概括成一条可预测的曲线。</p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">CEF有什么性质，能支撑起后面所有的论证？</p>
+      <p>三大性质，全部由迭代期望律推出（PDF第35-37页）。迭代期望律（式3.1.1）说：无条件期望等于CEF的无条件平均，$\mathbb{E}[Y_i] = \mathbb{E}\{\mathbb{E}[Y_i \mid X_i]\}$——外层期望针对 $X_i$ 的分布。作者用二重积分完整证明它，并明说"我们之所以在这里详细展开迭代期望律的证明，是因为CEF及其性质居于本章剩余部分的核心"——这不是例行公事，而是整章全部论证的引擎。由它推出三个定理：<strong>定理3.1.1分解性质</strong>——$Y_i = \mathbb{E}[Y_i \mid X_i] + \varepsilon_i$，且 $\varepsilon_i$ 关于 $X_i$ 均值独立、进而与 $X_i$ 的任何函数都不相关，任何随机变量都能干净地劈成"$X_i$ 能解释的部分"和"完全正交的部分"；<strong>定理3.1.2预测性质</strong>——在所有 $X_i$ 的函数中，CEF是对 $Y_i$ 的最小均方误预测，证明手法是把平方误差劈成三块、靠分解性质消掉交叉项；<strong>定理3.1.3方差分析</strong>——$V(Y_i) = V(\mathbb{E}[Y_i \mid X_i]) + \mathbb{E}[V(Y_i \mid X_i)]$，总方差分解为"被 $X_i$ 解释的方差"与"未被解释的方差"。这不是书斋里的摆设：Autor、Katz和Kearney（2005）正是用方差分析把工资分布的变化分解成工人特征能解释的部分和不能解释的部分——它是收入不平等研究的标准工具。</p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">这些性质依赖"线性"吗？</p>
+      <p>不依赖。三大性质"不仅在总体中成立，在样本中也同样成立，而且无需将CEF为线性作为这些性质和定理发挥作用的前提。事实上，线性回归作为经验研究的一种工具，其有效性也不依赖于线性性假设"（PDF第37页）。CEF不要求线性——那就出现一个悬而未决的问题：天天在做的线性回归，和这个不要求线性的CEF，到底是什么关系？这就是下一小节要正面回答的。</p>
+    </div>
+  </div>
+
+  <div class="wb-item points">
+    <div class="wb-label">Points</div>
+    CEF是统计关系的完整概括，不需要因果、不需要线性。它的分解性质最值得带走：任何 $Y_i$ 都能拆成"$X_i$ 能解释的部分"加"与 $X_i$ 的任何函数都不相关的残差"——这个残差的正交性，是后面解构回归、CIA条件化、倾向评分证明反复借用的同一把钥匙。
+  </div>
+</div>
+
+<p><span class="step-label conclusion">小结</span>
+CEF = 给定 $X_i$ 时 $Y_i$ 的期望，是统计关系的天然基准；迭代期望律是引擎，由它推出分解、预测、方差分析三大性质（定理3.1.1-3.1.3）；三性质不依赖线性与因果——这正是后面说"回归近似CEF"的立足点。</p>
+
+<div class="skeleton-box">
+  <h4>★ Skeleton</h4>
+  <div class="sk-item"><span class="sk-label">起点：</span><span class="sk-content">"教育预测收入"这类系统性随机性需要一个概括工具。</span></div>
+  <div class="sk-item"><span class="sk-label">工具：</span><span class="sk-content">条件期望的定义（积分/求和形式）+ 迭代期望律的二重积分证明。</span></div>
+  <div class="sk-item"><span class="sk-label">转折：</span><span class="sk-content">从"CEF是预测工具"转到"CEF是分解工具"——残差与 $X_i$ 任何函数正交，是全章的万能钥匙。</span></div>
+  <div class="sk-item"><span class="sk-label">内部次序：</span><span class="sk-content">定义CEF → 图3.1展示 → 证迭代期望律 → 推三大性质 → 声明"不需要线性"的伏笔。</span></div>
+  <div class="sk-item"><span class="sk-label">终点：</span><span class="sk-content">CEF是统计关系的完整概括，其性质在总体与样本中都成立且不依赖线性假设。</span></div>
+  <div class="fragile"><span class="fragile-label">⚠️ 易断点：</span>残差 $\varepsilon_i$ "与 $X_i$ 的任何函数不相关"比"与 $X_i$ 不相关"强在哪里？——如果只要求与 $X_i$ 不相关，定理3.1.2证明里的交叉项 $h(X_i)\varepsilon_i$ 就无法消掉。跟丢这一层，"CEF为什么是最优预测"就只剩结论没有原因。</div>
+</div>
+
+<p><span class="step-label significance">→</span>
+CEF完美但一般是非线性函数，三大性质也不要求线性。那么天天在做的线性回归和它是什么关系？若没有精确刻画，做回归就是盲目动作——§3.1.2正面回答。</p>
+
+<!-- §3.1.2 -->
+<h3 id="s31-2-1-2">§3.1.2 回归与CEF：解构回归与三个理由 <a href="#toc" class="back-to-toc">↑Contents</a></h3>
+
+<p><span class="step-label q">Q</span>
+CEF已经是"最好预测"和"完整概括"，为什么实证研究天天做的是线性回归？</p>
+
+<p><span class="step-label why">Why</span>
+"你打算做的回归是什么？在我们工作的圈子里几乎每天都能听到这种问题"（PDF第37页）——回归无处不在，但它的统计学身份从未被正面交代过。如果回归和CEF没关系，做回归就是研究者的盲目仪式；如果有关系，这个关系必须被精确刻画——是同一回事、是特例、还是近似？三者对应的解释纪律完全不同，说不清楚就会把近似当精确、把预测当因果。</p>
+
+<div class="what-block">
+  <p><span class="step-label what">What</span></p>
+
+  <div class="wb-item operation">
+    <div class="wb-label">Operation</div>
+    这一小节解决一个看上去尴尬的问题：CEF理论上完美，全行业却都在做线性回归，凭什么？答案一句话：回归是CEF的最佳线性近似。讲清楚这条结论需要四个子问题——回归是什么、系数度量什么、它和CEF什么关系、这个关系能否落地做实证。
+  </div>
+
+  <div class="wb-item argument">
+    <div class="wb-label">论证过程</div>
+
+    <div class="arg-qa">
+      <p class="arg-q">问题1：回归到底是什么？</p>
+      <p>回归就是用 $X_i$ 的线性函数 $X_i'b$ 去拟合 $Y_i$，选 $b$ 使预测误差平方的期望最小：</p>
+      <p>$$\beta = \arg\min_b \mathbb{E}[(Y_i - X_i'b)^2]$$</p>
+      <p>一阶条件解出来：</p>
+      <p>$$\beta = \mathbb{E}[X_iX_i']^{-1}\mathbb{E}[X_iY_i] \tag{3.1.2}$$</p>
+      <p>注意这个定义里没有任何因果、没有任何"模型正确"的成分——它就是一个最小化问题。它的副产品是：残差 $e_i = Y_i - X_i'\beta$ 与回归元不相关。这不是假设，是定义的数学后果，所以残差本身没有独立含义——"它的存在和价值都是因为有了β"（PDF第37页）。</p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">问题2：多元回归里每个系数 $\beta_k$ 到底在度量什么？</p>
+      <p>$\beta_k$ 度量的不是"$x_k$ 对 $Y$ 的单独影响"，而是"剔除其他回归元影响后的 $x_k$"与 $Y_i$ 之间的二元斜率：</p>
+      <p>$$\beta_k = \frac{\mathrm{cov}(Y_i, \tilde{x}_{ki})}{V(\tilde{x}_{ki})} \tag{3.1.3}$$</p>
+      <p>其中 $\tilde{x}_{ki}$ 是 $x_{ki}$ 对其他回归元回归后的残差（这个公式归功于Frisch和Waugh 1933，PDF第38页）。为什么是这个形式？因为净化后的 $\tilde{x}_{ki}$ 与残差正交、与其他回归元正交，把它代回回归方程，交叉项全部消失，只剩 $\beta_k$ 一项。一个反面提醒：如果你只净化 $Y_i$（对其他回归元回归取残差）而不净化 $x_{ki}$，得到的 $\mathrm{cov}(\tilde{Y}_{ki}, x_{ki})/V(x_{ki})$ 不等于 $\beta_k$——两边都要净化。<span class="app-ref">推导详见 <a href="#s31-appendix-A2">Appendix A.2 ↓</a></span></p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">问题3：CEF一般是非线性的，线性回归凭什么有资格？</p>
+      <p>回归不需要"CEF线性"这个假设，它的资格来自三种关系，其中第三种最硬（定理3.1.4-3.1.6，PDF第39-40页）。关系一：如果CEF恰好是线性的，回归就是CEF本身——但"CEF何时线性"的经典答案是Galton（1886）的联合正态假设，而回归元常是离散的、正态性是连续分布，这条路线经验上太窄（实用的替代方案是§3.1.4的饱和模型）。关系二：在所有线性函数中，回归对 $Y_i$ 的预测误差平方期望最小——对应"预测个体 $Y_i$"的目标。关系三（核心）：即使CEF是非线性的，在所有线性函数中，回归离CEF最近——它是对CEF本身的最优线性近似：</p>
+      <p>$$\beta = \arg\min_b \mathbb{E}\{(\mathbb{E}[Y_i \mid X_i] - X_i'b)^2\} \tag{3.1.4}$$</p>
+      <p>为什么关系三最重要？因为"我们并非真的对预测个体值 $Y_i$ 感兴趣，我们真正关心的乃是 $Y_i$ 的分布"——研究的目标是CEF，回归给出离这个分布最近的线性概括。图3.2把关系三画了出来：回归线贯穿图3.1的非线性CEF，看起来就像在估计 $\mathbb{E}[Y_i \mid X_i]$ 本身而不是 $Y_i$（PDF第40页）。</p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">问题4：这个"回归近似CEF"的结论，能直接拿来做实证吗？</p>
+      <p>能，分组数据回归就是它的直接应用。对离散的 $X_i$，式3.1.4的目标函数可以写成（PDF第40页）：</p>
+      <p>$$\mathbb{E}\{(\mathbb{E}[Y_i \mid X_i] - X_i'b)^2\} = \sum_u (\mathbb{E}[Y_i \mid X_i = u] - u'b)^2 g_x(u) \tag{3.1.5}$$</p>
+      <p>也就是说 $\beta$ 等价于对CEF的每个取值做加权最小二乘，权重 $g_x(u)$ 是 $X_i$ 取该值的概率。这不是数学闲趣：Angrist（1998）研究志愿参军对收入的影响时，社保收入记录不公开、拿不到个体 $Y_i$，就用按种族、性别、考分、教育、老兵身份分组的平均收入（即 $\mathbb{E}[Y_i \mid X_i]$ 的估计值）完成了研究。图3.3的Stata演示更直接：用409435个微观观测做回归，和只用21个教育年限分组均值做加权回归，教育系数一模一样，都是0.0674（PDF第41页）。这说明回归在数学上就是在拟合CEF，分组只是换了数据颗粒度。顺带埋一个钩子：分组回归的标准误0.0040并不等于微观估计量的渐进标准误0.0003447——这个差距正是§3.1.3要解决的问题。</p>
+    </div>
+  </div>
+
+  <div class="wb-item points">
+    <div class="wb-label">Points</div>
+    回归的身份是"CEF的最佳线性近似"，不是"假设CEF线性"。多元系数=净化后的二元斜率；分组数据回归=对CEF加权拟合的直接证据。合起来就是"为什么做回归"的完整答案：因为它在所有线性函数里离我们要的东西最近。
+  </div>
+</div>
+
+<p><span class="step-label conclusion">小结</span>
+回归 = CEF 的最优线性近似：线性时是CEF本身（理由Ⅰ）、预测 $Y_i$ 时是最优线性预测（理由Ⅱ）、近似CEF时是最优线性近似（理由Ⅲ，最重要）；解构回归公式给出每个系数"净化后二元斜率"的含义；Angrist（1998）的分组数据研究证明这一身份可直接用于实证。</p>
+
+<div class="skeleton-box">
+  <h4>★ Skeleton</h4>
+  <div class="sk-item"><span class="sk-label">起点：</span><span class="sk-content">CEF太一般，回归无处不在，两者的关系必须被精确刻画。</span></div>
+  <div class="sk-item"><span class="sk-label">工具：</span><span class="sk-content">总体最小二乘问题（一阶条件）+ Frisch-Waugh解构公式 + 最小均方误的分解证法（§3.1.1的残差正交性）。</span></div>
+  <div class="sk-item"><span class="sk-label">转折：</span><span class="sk-content">从"回归预测 $Y_i$"转到"回归近似 $\mathbb{E}[Y_i \mid X_i]$"——关心的是 $Y_i$ 的分布而非个体预测值，这是全章解释纪律的枢纽。</span></div>
+  <div class="sk-item"><span class="sk-label">内部次序：</span><span class="sk-content">定义β（3.1.2）→ 解构多元系数（3.1.3）→ 三理由定理（3.1.4-3.1.6）→ 分组数据WLS与图3.3实证。</span></div>
+  <div class="sk-item"><span class="sk-label">终点：</span><span class="sk-content">$\beta_k$ 是"剔除其他变量后"的二元斜率；回归整体是CEF的最佳线性近似，不依赖线性假设。</span></div>
+  <div class="fragile"><span class="fragile-label">⚠️ 易断点：</span>三个理由定理对应三个不同的目标函数（CEF本身 / $Y_i$ 的预测 / CEF的近似），凭什么共享同一个 $\beta$？——因为它们的最小化问题在代数上等价（定理3.1.6的证明把平方和拆开、交叉项由分解性质归零）。看不到这个等价，三个定理就像三个互不相干的说法。</div>
+</div>
+
+<p><span class="step-label significance">→</span>
+β的身份确立了，但它只是总体矩的函数。研究者手里只有一个样本，报告的 $\hat{\beta}$ 是什么、标准误怎么来、检验凭什么成立——推断的完整链条尚未建立，§3.1.3补上。</p>
+
+<!-- §3.1.3 -->
+<h3 id="s31-2-1-3">§3.1.3 渐进推断与稳健标准误 <a href="#toc" class="back-to-toc">↑Contents</a></h3>
+
+<p><span class="step-label q">Q</span>
+总体β看不见，手里的样本能告诉我们关于它的什么？标准误和检验建立在什么之上？</p>
+
+<p><span class="step-label why">Why</span>
+论文里报告的所有数字都是估计量。没有估计量的抽样分布，系数、星号、置信区间都没有地基——"统计推断与如何对一个特定回归结果进行解释是不同的。不论回归参数表示的是什么，它都有一个样本分布"（PDF第42页）。先有分布，才有资格谈显著与不显著。</p>
+
+<div class="what-block">
+  <p><span class="step-label what">What</span></p>
+
+  <div class="wb-item operation">
+    <div class="wb-label">Operation</div>
+    这一小节回答：样本怎么估计总体β，估计量有什么分布？答案分三步：OLS是矩估计量；大数定理、中心极限定理、斯拉茨基定理这套工具箱给出它的渐进分布——三明治公式；三明治公式确立"稳健标准误才是少假设的基准"，软件默认的同方差标准误反而是强假设。
+  </div>
+
+  <div class="wb-item argument">
+    <div class="wb-label">论证过程</div>
+
+    <div class="arg-qa">
+      <p class="arg-q">样本里怎么得到β的估计？</p>
+      <p>总体 $\beta = \mathbb{E}[X_iX_i']^{-1}\mathbb{E}[X_iY_i]$ 是 $W_i = (Y_i, X_i')'$ 的矩的函数，矩估计的原则只有一句话："把所有的期望算子换成连加符号"（PDF第42页），照此办理得到OLS：</p>
+      <p>$$\hat{\beta} = \left[\sum_i X_iX_i'\right]^{-1}\sum_i X_iY_i \tag{3.1.6}$$</p>
+      <p>它恰好也是样本版最小二乘问题的解——名字由此而来。假设 $W_i$ 独立同分布后，由大数定理，样本矩收敛到总体矩。到这里，"回归"从一个总体概念落实为一个可计算的样本对象。</p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">这个估计量随样本增大有什么统计行为？</p>
+      <p>要谈分布，先摆出标准弹药（PDF第43-44页，正式的数学处理见Knight 2000）：大数定理——样本矩依概率收敛于总体矩；中心极限定理——标准化后的样本矩渐进正态；斯拉茨基定理——依分布收敛者可与依概率收敛的常数自由置换（有和与积两个版本）；连续映射定理——概率极限可穿过连续函数；德尔塔法——渐进正态随机向量的连续可微函数仍渐进正态，协方差为梯度二次型。后面的推导全部是这些定理的排列组合。</p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">β_hat的分布到底是什么？</p>
+      <p>把 $Y_i = X_i'\beta + e_i$ 代入式3.1.6，得 $\hat{\beta} = \beta + [\sum X_iX_i']^{-1}\sum X_ie_i$；用斯拉茨基定理把样本交叉矩阵换成 $\mathbb{E}[X_iX_i']^{-1}$，用中心极限定理处理 $\frac{1}{\sqrt{N}}\sum X_ie_i$，最终得到三明治形式的协方差矩阵（PDF第44页）：</p>
+      <p>$$\mathrm{AsyVar}(\hat{\beta}) = \mathbb{E}[X_iX_i']^{-1}\mathbb{E}[X_iX_i'e_i^2]\mathbb{E}[X_iX_i']^{-1} \tag{3.1.7}$$</p>
+      <p>两片"面包"是回归元二阶矩的逆，中间"肉"是 $X_iX_i'e_i^2$ 的期望——异方差全部被中间这一块接住。注意中间项的均值之所以为零，是因为 $\mathbb{E}[X_ie_i]=0$ 是β的定义产物、不是经济学假设（PDF第44页）。用估计残差 $\hat{e}_i = Y_i - X_i'\hat{\beta}$ 构造四阶矩的样本版本，对角元素开根号就是标准误——这就是异方差稳健标准误：怀特标准误（White 1980a），也纪念Eicker（1967）称Eicker-White标准误，Stata里叫robust（PDF第44-45页）。<span class="app-ref">推导详见 <a href="#s31-appendix-A3">Appendix A.3 ↓</a></span></p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">为什么"稳健"该是默认，而不是"额外保险"？</p>
+      <p>因为软件默认的标准误来自同方差假设 $\mathbb{E}[e_i^2 \mid X_i] = \sigma^2$，此时三明治退化为 $\sigma^2\mathbb{E}[X_iX_i']^{-1}$（式3.1.8）——"除非你要求它报告稳健的标准误，否则在SAS或者Stata中报告的将是式3.1.8对角线元素的值"（PDF第45页）。默认的才是强假设。而且把回归看作CEF近似时，异方差是自然的：即使条件方差恒定，回归线与CEF的差距也会让残差方差随 $X_i$ 变化（White 1980b注意到的分解）；极端例子是线性概率模型LPM——$Y$ 是0-1变量（如是否参加劳动力）时条件方差是 $p(1-p)$，天然随 $X_i$ 变化，"除非回归元是个常数，否则线性回归模型的残差项一定是异方差的"（PDF第46页）。实际影响有多大？图3.3给出答案：微观数据的稳健标准误0.0003447与传统0.0003043几乎相同，分组数据里是0.0040对0.0029；经验规则是"如果异方差性变化很大，比如标准误上升了30%或者有任何显著的下降，那么你应该注意是不是存在可能的程序错误"（PDF第46页）。最后对比经典正态回归模型（Goldberger 1991）：回归元固定+CEF线性+正态+同方差全满足才能推出小样本无偏性和精确方差公式；现代经验研究选渐进框架，是因为它需要更弱假设下的稳健方差——"大样本的方法也不是没有其问题，我们会在第8章讨论推断时再回来说明"。</p>
+    </div>
+  </div>
+
+  <div class="wb-item points">
+    <div class="wb-label">Points</div>
+    稳健标准误不是"额外保险"，而是少假设的基准；软件默认的同方差标准误才是强假设的特例。你的Y是0-1变量时异方差是数学必然，不需要检验、不需要加权，直接上稳健（聚类）标准误——这是本节最直接可操作的一条纪律。
+  </div>
+</div>
+
+<p><span class="step-label conclusion">小结</span>
+OLS是β的矩估计量（3.1.6）；由大数定理保证一致性，由斯拉茨基定理+中心极限定理推出三明治方差（3.1.7）——稳健标准误是默认；同方差（3.1.8）是软件默认的强假设特例；LPM下异方差不可避免但影响通常有限（30%经验警戒线）；经典正态模型的无偏性需要强假设，渐进框架是现代经验研究的底座。</p>
+
+<div class="skeleton-box">
+  <h4>★ Skeleton</h4>
+  <div class="sk-item"><span class="sk-label">起点：</span><span class="sk-content">β是总体矩的函数，样本只能给出矩的估计。</span></div>
+  <div class="sk-item"><span class="sk-label">工具：</span><span class="sk-content">矩估计原则 + LLN/CLT/斯拉茨基定理/连续映射/德尔塔法（Knight 2000）。</span></div>
+  <div class="sk-item"><span class="sk-label">转折：</span><span class="sk-content">$\mathbb{E}[X_ie_i]=0$ 不是假设而是β的定义产物——推断的成立完全不需要"模型正确"。</span></div>
+  <div class="sk-item"><span class="sk-label">内部次序：</span><span class="sk-content">矩估计定义OLS → 摆工具箱 → 代入 $Y=X'\beta+e$ 推出三明治 → 同方差退化 → LPM/30%规则/经典模型对比。</span></div>
+  <div class="sk-item"><span class="sk-label">终点：</span><span class="sk-content">$\hat{\beta}$ 渐进正态、协方差为三明治公式（3.1.7），稳健标准误是基准而非例外。</span></div>
+  <div class="fragile"><span class="fragile-label">⚠️ 易断点：</span>为什么稳健标准误不需要估计"每个 $X_i$ 处的条件方差函数"？——因为三明治中间项 $\mathbb{E}[X_iX_i'e_i^2]$ 是对 $X_i$ 自动取平均的总体矩，样本版本直接连加即可，不需要对 $\mathbb{E}[e_i^2 \mid X_i]$ 建模。这一步没想通，就会误以为稳健标准误和WLS一样需要先估计条件方差。</div>
+</div>
+
+<p><span class="step-label significance">→</span>
+推断链条齐了：β是什么（§3.1.2）、$\hat{\beta}$ 怎么分布（本节）。但§3.1.2的关系一留了个悬念——"CEF线性时回归等于CEF"，什么时候线性？§3.1.4收口。</p>
+
+<!-- §3.1.4 -->
+<h3 id="s31-2-1-4">§3.1.4 饱和模型：近似变精确 <a href="#toc" class="back-to-toc">↑Contents</a></h3>
+
+<p><span class="step-label q">Q</span>
+什么时候回归不是CEF的"近似"而是"精确"？论文里"主效应""交互项"背后的模型结构是什么？</p>
+
+<p><span class="step-label why">Why</span>
+前面一路讲"近似"，自然要问有没有让回归精确拟合CEF的设定；更重要的是，术语"饱和""主效应"起源于实验者用回归讨论离散处理变量的传统，"如今已在包括应用计量经济学在内的很多领域得到广泛应用"（PDF第47页）——读不懂这套语言的模型结构，连别人回归表里系数的含义都无法核对。</p>
+
+<div class="what-block">
+  <p><span class="step-label what">What</span></p>
+
+  <div class="wb-item operation">
+    <div class="wb-label">Operation</div>
+    这一小节回答两个问题：近似何时变精确——答案是饱和模型；论文参数化语言怎么读——主效应+交互项。一箭双雕：收掉定理3.1.4留下的线头，同时给出读任何回归表的参数化语法。
+  </div>
+
+  <div class="wb-item argument">
+    <div class="wb-label">论证过程</div>
+
+    <div class="arg-qa">
+      <p class="arg-q">有没有让回归精确拟合CEF的设定？</p>
+      <p>有——饱和模型：离散解释变量的每个可能取值都有专属参数（PDF第47页）。教育年限 $S_i$ 取 $0,1,\dots,\bar{\tau}$ 时，饱和模型（式3.1.9）用 $\bar{\tau}$ 个虚拟变量 $d_{ji} = 1[S_i = j]$ 表示"是否读了j年书"：</p>
+      <p>$$Y_i = \alpha + \beta_1 d_{1i} + \beta_2 d_{2i} + \dots + \beta_{\bar{\tau}} d_{\bar{\tau}i} + \varepsilon_i \tag{3.1.9}$$</p>
+      <p>于是 $\beta_j = \mathbb{E}[Y_i \mid S_i = j] - \mathbb{E}[Y_i \mid S_i = 0]$——每个系数就是一个精确的条件均值差，参照组可取 $S_i$ 的任何值。为什么能精确拟合？"因为用来构造饱和模型的虚拟变量所构成的条件期望函数本来就是线性的。这是线性条件期望函数定理的一个重要特例。"§3.1.2悬置的"CEF何时线性"在此得到回答：离散协变量+饱和设定=线性不请自来。</p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">两个虚拟变量（大学毕业×女性）时，参数化长什么样？</p>
+      <p>$x_{1i}$ 表示大学毕业、$x_{2i}$ 表示女性，CEF取四个值，四个参数恰好一一对应（PDF第47-48页）：$\alpha$、$\alpha+\beta_1$、$\alpha+\gamma$、$\alpha+\beta_1+\gamma+\delta_1$——零限制。写成：</p>
+      <p>$$\mathbb{E}[Y_i \mid x_{1i}, x_{2i}] = \alpha + \beta_1 x_{1i} + \gamma x_{2i} + \delta_1(x_{1i}x_{2i}) \tag{3.1.10}$$</p>
+      <p>虚拟变量的系数叫主效应，乘积叫交互项。多值教育与性别的组合则给出 $\bar{\tau}$ 个教育主效应+1个性别主效应+ $\bar{\tau}$ 个性别-教育交互项，交互项系数 $\delta_j$"告诉我们教育对不同性别的不同影响"。还有一种等价参数化：四个"男×学历"组合虚拟变量、无截距——任何能识别所有协变量取值的示性变量集合都可以。</p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">交互项这么多，实践里怎么取舍？</p>
+      <p>饱和是自然起点，但交互项众多且"很难对交互项的系数做出准确的估计"，所以省略部分或全部交互项往往是明智选择（PDF第48页）：如果大学教育对男女的回报大致相同，只有主效应相加的模型就能很好地逼近CEF——并且注意，此时"教育水平前面的系数表达的都是两种性别的个体的教育回报的加权平均值"（这是§3.3.1的伏笔）。反例是式3.1.11——省略主效应只留交互项的模型"要求教育只会影响女性的工资这样一种和事实相差甚远的假设"，结果几乎无法解释。这条纪律与§3.2.3的坏控制警告前后呼应，构成全章控制变量选择的一体两面。</p>
+    </div>
+  </div>
+
+  <div class="wb-item points">
+    <div class="wb-label">Points</div>
+    饱和模型是CEF与回归完全重合的唯一通用场景——它是"近似"论的特例证明，而不是反例。省略交互项后主效应系数是子组效应的加权平均（§3.3.1伏笔），只留交互项省略主效应则几乎无法解释——这两条语法规则适用于你读过的绝大多数回归表。
+  </div>
+</div>
+
+<p><span class="step-label conclusion">小结</span>
+饱和模型=每个协变量取值一个参数，必然线性、必然完美拟合CEF（定理3.1.4的重要特例）；主效应+交互项是其标准参数化；省略交互项是可接受的近似（系数变加权平均），只留交互项是应避免的设定；饱和性质与 $Y_i$ 的分布无关。</p>
+
+<div class="skeleton-box">
+  <h4>★ Skeleton</h4>
+  <div class="sk-item"><span class="sk-label">起点：</span><span class="sk-content">定理3.1.4说CEF线性时回归即CEF，"何时线性"被推迟到这里。</span></div>
+  <div class="sk-item"><span class="sk-label">工具：</span><span class="sk-content">示性函数（虚拟变量）的参数化 + 条件期望的线性结构。</span></div>
+  <div class="sk-item"><span class="sk-label">转折：</span><span class="sk-content">从"线性是假设"转到"线性是参数化的结果"——饱和设定下线性不请自来。</span></div>
+  <div class="sk-item"><span class="sk-label">内部次序：</span><span class="sk-content">多值教育饱和模型（3.1.9）→ 双虚拟变量四值参数化（3.1.10）→ 多值×性别交互项 → 省略交互项/只留交互项两条纪律。</span></div>
+  <div class="sk-item"><span class="sk-label">终点：</span><span class="sk-content">饱和模型完美拟合CEF且与Y的分布无关；省略交互项→加权平均，只留交互项→不可解释。</span></div>
+  <div class="fragile"><span class="fragile-label">⚠️ 易断点：</span>"饱和模型完美拟合CEF"与"饱和性质与 $Y_i$ 的分布无关"是什么关系？——前者说的是拟合的精确性（$\mathbb{E}[Y \mid X]$ 被虚拟变量线性表示），后者说的是对 $Y_i$ 的分布无任何假设（不需要正态、不需要同方差）。两者常被混为一谈。</div>
+</div>
+
+<p><span class="step-label significance">→</span>
+§3.1闭环：回归作为统计对象——是什么（CEF近似）、怎么推断（三明治）、何时精确（饱和）——全部就位，且全程没有因果二字。但本节开头承诺的深水区还没碰：什么时候这个统计对象能升级为因果对象？§3.2接手。</p>
+
+<!-- §3 完整逻辑链 -->
+<h2 id="s31-3">§3 · The Thread <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<p>本节的全部论证是一条"先立基准、再定身份、再补推断、最后收口"的链。从"观察数据下回归无法自动获得因果解释"这个诚实的起点出发，先做减法：用CEF概括"教育预测收入"这类系统性随机性，证明它可分解、可预测、可做方差分析——而且这一切不需要线性；然后正面回答"为什么做回归"——因为它是CEF的最佳线性近似（线性时就是CEF本身），解构回归公式进一步说明每个多元系数都在剔除其他变量影响后度量净关系，Angrist（1998）的分组数据研究展示了这一近似属性的实战价值；接着从总体转入样本，用矩估计定义OLS，用大数定理、中心极限定理、斯拉茨基定理推出三明治方差公式，确立稳健标准误为默认姿势，顺带解释异方差为何是常态而非例外；最后用饱和模型回答"近似何时变精确"，给出主效应与交互项的参数化语言。到本节结束时，回归作为一个统计对象——是什么、怎么推断、何时精确——全部就位，且全程没有动用因果二字。§3.2将在这个地基上引入条件独立假设，把因果解释重新放回回归头上。</p>
+
+<!-- §3.5 本节小结 -->
+<h2 id="s31-3-5">§3.5 · 本节小结 <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<div class="chapter-summary">
+  <h3>一句话总览</h3>
+  <p><strong>回归的统计学身份完整而不依赖任何因果假设：它是条件期望函数（CEF）的最佳线性近似，其推断只需大样本理论——三明治方差公式让稳健标准误成为默认。</strong></p>
+
+  <h3>四个子问题的答案回顾</h3>
+  <p><strong>用什么概括统计关系？</strong>CEF——给定 $X_i$ 时 $Y_i$ 的期望；迭代期望律是引擎，推出分解（残差与 $X_i$ 任何函数正交）、预测（MMSE最优）、方差分析三大性质，全都不依赖线性。</p>
+  <p><strong>为什么做回归？</strong>回归是CEF的最佳线性近似（理由Ⅲ）；每个系数是"剔除其他变量影响后"的二元斜率（Frisch-Waugh）；分组数据加权回归与微观回归系数完全一致（图3.3：0.0674），证明回归就是在对CEF做加权拟合。</p>
+  <p><strong>怎么推断总体β？</strong>OLS=矩估计；渐进分布的三明治公式（3.1.7）不需要同方差——稳健标准误是少假设的基准，软件默认的同方差标准误才是强假设；LPM残差必然异方差但影响通常有限（30%警戒线）。</p>
+  <p><strong>近似何时变精确？</strong>饱和模型——每个协变量取值一个专属参数，完美拟合CEF；主效应+交互项是其参数化语法；省略交互项→系数变子组效应的加权平均，只留交互项→几乎不可解释。</p>
+
+  <h3>最该带走的三点</h3>
+  <p>① 报告系数永远用"条件均值（CEF）的线性近似"语言，不用个体预测语言；② 所有回归默认稳健（聚类）标准误，异方差不需要检验也不需要加权；③ 加控制变量后系数的移动，本质是Frisch-Waugh净化范围的改变——这是后面读任何回归表的通用视角。</p>
+</div>
+
+<!-- §4 Implications -->
+<h2 id="s31-4">§4 · Implications <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<div class="implications">
+  <div class="pair">
+    <div class="book-says">回归是CEF的最佳线性近似，我们关心的"乃是 $Y_i$ 的分布"，不是个体预测值（定理3.1.6，PDF第40页）。</div>
+    <div class="for-you">你的treat_post系数解释为"政策实施后处理组企业OFDI条件均值的变化"，不是"每个企业都会多投β次"。写论文、汇报结果统一用条件期望语言。</div>
+  </div>
+  <div class="pair">
+    <div class="book-says">解构回归：β_k = 剔除其他回归元影响后的二元斜率（式3.1.3，Frisch-Waugh 1933）。</div>
+    <div class="for-you">reghdfe的高维固定效应就是在机器层面大规模执行Frisch-Waugh。基准回归逐步加控制变量（模型1→2→3）时treat_post的移动方向和幅度，就是遗漏变量偏误的指示器——把"系数是否稳定"作为稳健性论据写进论文。</div>
+  </div>
+  <div class="pair">
+    <div class="book-says">三明治公式（3.1.7）是少假设的基准，软件默认的同方差标准误（3.1.8）才是强假设；LPM残差必然异方差（PDF第45-46页）。</div>
+    <div class="for-you">你的Y（是否OFDI）是0-1变量，异方差是与生俱来的：不需要先做异方差检验，所有回归直接写cluster(城市编码)。若稳健与默认标准误差距异常大（30%警戒线），先查数据构造。</div>
+  </div>
+  <div class="pair">
+    <div class="book-says">饱和模型语法：省略交互项→主效应系数是子组效应的加权平均；只留交互项省略主效应→几乎无法解释（式3.1.10/3.1.11，PDF第48页）。</div>
+    <div class="for-you">你的异质性分析用treat_post与分组变量（规模、地区、行业）交互时，两种设定的系数含义不同——省略交互项时treat_post是子组效应的加权平均，报告时要说明；不要出现式3.1.11那种只留交互项的设定。</div>
+  </div>
+  <div class="pair">
+    <div class="book-says">分组数据用组规模加权回归，与微观数据回归结果完全相同（图3.3：21个分组均值 vs 409435个微观观测，系数都是0.0674）。</div>
+    <div class="for-you">若将来做城市-年份层面的加总稳健性检验，必须按"组内观测数"加权才等价于你的微观回归；不加权得到的是另一个估计对象，报告时要说明。</div>
+  </div>
+</div>
+
+<!-- §5 Takeaway -->
+<h2 id="s31-5">§5 · Takeaway <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<div class="takeaway">
+  回归不欠因果一个解释也能成立——它是条件期望函数的最佳线性近似，推断只需大样本加稳健标准误；要让系数变成因果效应，需要的是§3.2的条件独立假设。
+</div>
+
+<!-- §6 Next -->
+<h2 id="s31-6">§6 · Next <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<ul class="todo-list">
+  <li class="pri-1">CEF分解性质（定理3.1.1）——残差与X的任何函数正交，是后面CIA条件化、倾向评分证明、δ_R推导反复借用的钥匙</li>
+  <li class="pri-1">定理3.1.6（CEF回归定理）——你解释任何回归系数的语言基础</li>
+  <li class="pri-1">三明治方差公式（3.1.7）与LPM必然异方差——你所有标准误选择的依据</li>
+  <li class="pri-1">饱和模型语法（3.1.9-3.1.11）——读异质性回归表的基础</li>
+  <li class="pri-2">迭代期望律的积分证明细节——用到时回看Appendix A.1</li>
+  <li class="pri-2">分组数据WLS技巧——做加总层面稳健性时再翻§3.1.2问题4</li>
+  <li class="pri-2">经典正态回归模型的无偏性（Goldberger 1991）——了解即可</li>
+</ul>
+
+<!-- Appendix A -->
+<h2 id="s31-appendix-a">Appendix A · 公式详细推导 <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<h3 id="s31-appendix-A1">A.1 迭代期望律的证明（式3.1.1） <a href="#s31-2-1-1" class="app-back">↩正文</a></h3>
+<div class="derivation-step">
+  <strong>起点：</strong>对联合密度 $f_{xy}(u,t)$ 的连续随机变量 $(X_i, Y_i)$，CEF定义为 $\mathbb{E}[Y_i \mid X_i=u] = \int t\, f_y(t \mid X_i=u)\, dt$。外层期望只是"把CEF的每个取值按 $X_i$ 的边际密度 $g_x(u)$ 平均"：
+  $$\mathbb{E}\{\mathbb{E}[Y_i \mid X_i]\} = \int \mathbb{E}[Y_i \mid X_i=u]\, g_x(u)\, du$$
+</div>
+<div class="derivation-step">
+  <strong>第1步：</strong>把CEF的定义代入，内层期望展开为对t的积分：
+  $$= \int \left[\int t\, f_y(t \mid X_i=u)\, dt\right] g_x(u)\, du$$
+</div>
+<div class="derivation-step">
+  <strong>第2步：</strong>合并为二重积分并交换积分顺序（Fubini）：
+  $$= \iint t\, f_y(t \mid X_i=u)\, g_x(u)\, du\, dt = \int t \left[\int f_y(t \mid X_i=u)\, g_x(u)\, du\right] dt$$
+</div>
+<div class="derivation-step">
+  <strong>第3步：</strong>方括号内由条件密度定义 $f_y(t \mid u)g_x(u) = f_{xy}(u,t)$（联合密度），对u积分得到t的边际密度 $g_y(t)$：
+  $$= \int t\, g_y(t)\, dt = \mathbb{E}[Y_i]$$
+  证毕。外层期望针对 $X_i$，内层针对 $Y_i$——"期望的期望"等于无条件期望。
+</div>
+
+<h3 id="s31-appendix-A2">A.2 解构回归公式的推导（式3.1.3） <a href="#s31-2-1-2" class="app-back">↩正文</a></h3>
+<div class="derivation-step">
+  <strong>起点：</strong>多元回归 $Y_i = \alpha + \beta_1 x_{1i} + \dots + \beta_K x_{Ki} + e_i$，考察第k个系数。定义 $\tilde{x}_{ki}$ 为 $x_{ki}$ 对其他回归元回归的残差。
+</div>
+<div class="derivation-step">
+  <strong>第1步：</strong>$\tilde{x}_{ki}$ 有三个正交性：它是回归元的线性组合，故与 $e_i$ 不相关（总体残差与所有回归元不相关）；它是 $x_{ki}$ 对其他回归元回归的残差，故与其他回归元不相关；因此 $\mathrm{cov}(\tilde{x}_{ki}, x_{ki}) = V(\tilde{x}_{ki})$（$x_{ki} = \tilde{x}_{ki}$ + 拟合值，拟合值与 $\tilde{x}_{ki}$ 不相关）。
+</div>
+<div class="derivation-step">
+  <strong>第2步：</strong>把回归方程代入 $\mathrm{cov}(Y_i, \tilde{x}_{ki})$，除 $\beta_k x_{ki}$ 项外全部被正交性消掉：
+  $$\mathrm{cov}(Y_i, \tilde{x}_{ki}) = \beta_k \mathrm{cov}(x_{ki}, \tilde{x}_{ki}) = \beta_k V(\tilde{x}_{ki})$$
+  移项即得 $\beta_k = \mathrm{cov}(Y_i, \tilde{x}_{ki})/V(\tilde{x}_{ki})$（式3.1.3）。这就是Frisch-Waugh（1933）定理：多元系数=剔除其他变量影响后的二元斜率。
+</div>
+
+<h3 id="s31-appendix-A3">A.3 三明治方差公式的推导（式3.1.7） <a href="#s31-2-1-3" class="app-back">↩正文</a></h3>
+<div class="derivation-step">
+  <strong>起点：</strong>$\hat{\beta} = [\sum X_iX_i']^{-1}\sum X_iY_i$，且 $Y_i = X_i'\beta + e_i$，$\mathbb{E}[X_ie_i] = 0$（β的定义产物）。
+</div>
+<div class="derivation-step">
+  <strong>第1步：</strong>代入得 $\hat{\beta} = \beta + [\sum X_iX_i']^{-1}\sum X_ie_i$，两边减β乘 $\sqrt{N}$：
+  $$\sqrt{N}(\hat{\beta}-\beta) = N\left[\sum X_iX_i'\right]^{-1}\cdot \frac{1}{\sqrt{N}}\sum X_i e_i$$
+</div>
+<div class="derivation-step">
+  <strong>第2步：</strong>斯拉茨基定理：$N[\sum X_iX_i']^{-1}$ 依概率收敛于 $\mathbb{E}[X_iX_i']^{-1}$，可与 $\frac{1}{\sqrt{N}}\sum X_ie_i$ 置换，渐进分布不变。中心极限定理：$\frac{1}{\sqrt{N}}\sum X_ie_i$ 渐进正态，均值0（因 $\mathbb{E}[X_ie_i]=0$），方差 $\mathbb{E}[X_iX_i'e_i^2]$。
+</div>
+<div class="derivation-step">
+  <strong>第3步：</strong>合并：$\sqrt{N}(\hat{\beta}-\beta) \to N(0,\, \mathbb{E}[XX']^{-1}\mathbb{E}[XX'e^2]\mathbb{E}[XX']^{-1})$（式3.1.7）。同方差 $\mathbb{E}[e^2 \mid X]=\sigma^2$ 时，迭代期望律把中间项化为 $\sigma^2\mathbb{E}[XX']$，整体退化为 $\sigma^2\mathbb{E}[XX']^{-1}$（式3.1.8）——软件默认标准误。
+</div>
+
+<h3 id="s31-appendix-A4">A.4 饱和参数化（式3.1.9/3.1.10） <a href="#s31-2-1-4" class="app-back">↩正文</a></h3>
+<div class="derivation-step">
+  <strong>多值教育：</strong>虚拟变量 $d_{ji} = 1[S_i=j]$ 下，$\mathbb{E}[Y_i \mid S_i=j] = \alpha + \beta_j$、$\mathbb{E}[Y_i \mid S_i=0] = \alpha$，相减即 $\beta_j = \mathbb{E}[Y_i \mid S_i=j] - \mathbb{E}[Y_i \mid S_i=0]$。参照组取任何值均可，只要每个取值都有专属参数。
+</div>
+<div class="derivation-step">
+  <strong>双虚拟变量：</strong>CEF的四个取值与四个参数一一对应：$(0,0)\to\alpha$、$(1,0)\to\alpha+\beta_1$、$(0,1)\to\alpha+\gamma$、$(1,1)\to\alpha+\beta_1+\gamma+\delta_1$——四个方程四个未知数，恰好识别，因此 $\delta_1$ 就是"两个单效应之和以外多出来的部分"，即交互效应。
+</div>
+
+<!-- Appendix B -->
+<h2 id="s31-appendix-b">Appendix B · 补充材料与延伸阅读 <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<h3>B.1 本节三张图的数据</h3>
+<table>
+  <tr><th>图</th><th>数据</th><th>要点</th></tr>
+  <tr><td>图3.1</td><td>1980年IPUMS 5%样本，40-49岁白人男性</td><td>教育年限→对数周工资的CEF曲线；多读一年书平均多赚10%；关键教育值4/8/12/16处标出收入分布</td></tr>
+  <tr><td>图3.2</td><td>同图3.1</td><td>回归线贯穿非线性CEF——"看起来就像在估计E[Y|X]本身"</td></tr>
+  <tr><td>图3.3</td><td>同图3.1；微观409435观测 vs 21个教育分组均值</td><td>两组回归教育系数都是0.0674；分组标准误0.0040≠微观稳健标准误0.0003447</td></tr>
+</table>
+
+<h3>B.2 引用文献速查</h3>
+<table>
+  <tr><th>引用</th><th>页码</th><th>本节中的作用</th></tr>
+  <tr><td>Galton (1886)</td><td>p039</td><td>联合正态假设下CEF线性（理由Ⅰ的经典条件）</td></tr>
+  <tr><td>Frisch &amp; Waugh (1933)</td><td>p038</td><td>解构回归公式（3.1.3）</td></tr>
+  <tr><td>Eicker (1967); White (1980a, 1980b)</td><td>p044-045</td><td>稳健标准误；回归残差方差的异方差结构</td></tr>
+  <tr><td>Knight (2000)</td><td>p043</td><td>渐进分布定理的正式处理</td></tr>
+  <tr><td>Goldberger (1991)</td><td>p046</td><td>经典正态回归模型（无偏性路线）</td></tr>
+  <tr><td>Angrist (1998)</td><td>p040-041</td><td>用分组均值回归研究志愿参军对收入的影响（CEF回归定理的实战）</td></tr>
+  <tr><td>Autor, Katz &amp; Kearney (2005)</td><td>p037</td><td>方差分析在工资不平等研究中的应用</td></tr>
+</table>
+
+<h3>B.3 Stata实操对应</h3>
+<pre><code>* 稳健标准误（式3.1.7的样本版；LPM必用）
+regress y x, robust
+
+* 聚类标准误（三明治公式在组内相关下的推广）
+regress y x, cluster(city_code)
+
+* 分组数据回归与微观回归系数相同（图3.3）
+collapse (mean) y [aweight=n], by(x)   // 先算组均值
+regress y x [aweight = n]              // 系数与微观回归一致
+</code></pre>
+
+<h3>B.4 本节在全章中的位置</h3>
+<div class="problem-tree">
+  <div class="root-q">§3.1是第3章的地基：先剥离因果，建立回归的纯统计学身份。</div>
+  <ul class="tree-list">
+    <li>§3.1（本节）：回归的统计学身份——CEF近似 + 渐进推断 + 饱和模型</li>
+    <li>§3.2：因果条件——CIA、遗漏变量偏误公式、坏控制</li>
+    <li>§3.3：异质性——回归=方差加权的匹配估计量、倾向评分</li>
+    <li>§3.4：操作细节——加权回归、有限被解释变量、命名史</li>
+  </ul>
+</div>
+
+<!-- §0 前置定位 -->
+<h2 id="s32-0">§0 · Prelude <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<p>§3.1建立了回归的统计学身份——它是CEF的最佳线性近似，推断只需大样本理论。但3.1开头就点破的缺口被故意搁置了："当回归满足什么条件时我们可以对其赋予因果解释"（PDF第33页）。本节正面接手：给回归嫁接因果结构，回答什么条件下系数可以从"统计关系"升格为"因果效应"，并补上两个实操推论——遗漏变量偏误公式和不合格控制变量的判定。</p>
+
+<!-- §1 总问题树 -->
+<h2 id="s32-1">§1 · The Question <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<div class="problem-tree">
+  <div class="root-q">本节总问题：什么时候可以给回归系数一个因果解释？为了保住这个解释，控制变量应该怎么选、不该怎么选？</div>
+  <ul class="tree-list">
+    <li><a href="#s32-2-1-1">§3.2.1</a> 什么样的条件消除选择偏误：CIA
+      <ul class="tree-sublist"><li>观察差距=因果效应+选择偏误；CIA是消掉偏误的通行证</li></ul>
+    </li>
+    <li><a href="#s32-2-1-2">§3.2.2</a> 没控制好会偏多少：遗漏变量偏误公式
+      <ul class="tree-sublist"><li>OVB公式量化偏误；NLSY演示；CIA何时可信=制度论证</li></ul>
+    </li>
+    <li><a href="#s32-2-1-3">§3.2.3</a> 加错变量会怎样：不合格控制变量
+      <ul class="tree-sublist"><li>结果型变量制造新偏误；代理变量稀释真效应；时间先后判据</li></ul>
+    </li>
+  </ul>
+</div>
+
+<!-- §3.2.1 -->
+<h3 id="s32-2-1-1">§3.2.1 条件独立假设：选择偏误分解 <a href="#toc" class="back-to-toc">↑Contents</a></h3>
+
+<p><span class="step-label q">Q</span>
+观察数据下，什么样的条件能把"平均收入差异"读成"因果效应"？</p>
+
+<p><span class="step-label why">Why</span>
+§3.1的结论是回归近似CEF，但如果CEF本身只是统计关系，近似得再完美也提炼不出因果——"当CEF可以近似因果关系时，我们称相应的回归也具有因果性"只是把问题提到了更高层面（PDF第49页）。必须先回答：给CEF加上什么结构，条件均值之差才能变成因果效应。</p>
+
+<div class="what-block">
+  <p><span class="step-label what">What</span></p>
+
+  <div class="wb-item operation">
+    <div class="wb-label">Operation</div>
+    这一小节要回答：什么条件能让"平均差异"变成"因果效应"？答案一句话：条件独立假设（CIA）。讲清楚需要四个子问题：简单比较为什么不够、什么条件能消偏、多值处理怎么推广、无数个条件效应怎么汇总。
+  </div>
+
+  <div class="wb-item argument">
+    <div class="wb-label">论证过程</div>
+
+    <div class="arg-qa">
+      <p class="arg-q">"上大学赚得多"这类比较，凭什么不能直接读成因果？</p>
+      <p>因为观察到的差距是两项之和（式3.2.1，PDF第50页）：观察差距 = 处理组的平均因果效应 + 选择性偏误。背后的框架是潜在结果：$Y_{1i}$（上大学的收入）、$Y_{0i}$（不上大学的收入），观察到的 $Y_i = Y_{0i} + (Y_{1i} - Y_{0i})C_i$——两者只能看到其一。选择偏误项 $\mathbb{E}[Y_{0i} \mid C_i=1] - \mathbb{E}[Y_{0i} \mid C_i=0]$ 说的是：上大学的那些人即使不上大学也赚得更多（能力、家庭背景使然），所以简单比较会夸大大学收益。这个框架的直觉来自Angrist自己的高中故事（PDF第49页）：百无聊赖的高中生面对三条路——辍学打工、混个没什么价值的高中文凭、努力考大学，"不同的人生路径给每个特定个体带来不同结果这一点似乎是无可争议的"；Robert Frost《未选择的路》里那句"使得所有事情都变得不一样"，说的正是这种只能走一条路的人生结构。</p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">什么条件能让偏误项消失？</p>
+      <p>条件独立假设（CIA，式3.2.2）：给定可观察特征 $X_i$ 后，潜在结果与处理独立：</p>
+      <p>$$\{Y_{0i}, Y_{1i}\} \perp\!\!\!\perp C_i \mid X_i \tag{3.2.2}$$</p>
+      <p>也就是"选择偏误来自可观察变量"——我们希望保持不变的协变量都是已知和可观察的（Goldberger 1972；Barnow、Cain和Goldberger 1981）。随机实验中CIA自然成立（田纳西师生比例实验里，小班在每个学校内随机分配）；观察数据下，CIA意味着给定 $X_i$ 后处理"就像被随机分配的那样好"（PDF第51页）。对教育回报，$X_i$ 自然是"包含对能力和家庭背景进行度量的一个向量"——这已经预告了本节后半段的真正难题：$X_i$ 里该放什么。</p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">处理不止0/1（教育年限可以取很多值），CIA怎么推广？</p>
+      <p>用收入函数 $f_i(s)$ 回答"如果读s年书会赚多少"这个因果问句（PDF第51页）；CIA变为 $Y_{si} \perp\!\!\!\perp S_i \mid X_i$ 对一切s成立。给定CIA，比较 $S_i = 11$ 与 $S_i = 12$ 的平均收入差就等于高中毕业的平均因果效应 $\mathbb{E}[f_i(12) - f_i(11) \mid X_i]$——选择性偏误消失（PDF第52页）。注意这里比较的是"11年级辍学者若继续读"的反事实：偏误来自"高中毕业生如果11年级辍学的收入"与"真的在11年级辍学者的收入"之差，CIA把两者对齐。</p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">$X_i$ 取多少个值就有多少个因果效应，怎么汇总成一个数？</p>
+      <p>用迭代期望律加权平均——§3.1.1的引擎再次上场（PDF第52页）。无条件效应（式3.2.3/3.2.4）：$\mathbb{E}\{\mathbb{E}[Y_i \mid X_i, S_i=12] - \mathbb{E}[Y_i \mid X_i, S_i=11]\} = \mathbb{E}[f_i(12) - f_i(11)]$，用 $X_i$ 的边际分布加权；对高中毕业生的效应（式3.2.5/3.2.6）：用毕业生中 $X_i$ 的分布加权。这就是匹配估计值的雏形——在协变量相同的个体之间比较不同教育水平的平均收入差，再按某种方式加权。但它有两个软肋（PDF第53页）："需要两步走——匹配和平均"，标准误怎么算也不明显；且 $S_i$ 取值很多时效应太多。这两个软肋正是回归登场的机会。</p>
+    </div>
+  </div>
+
+  <div class="wb-item points">
+    <div class="wb-label">Points</div>
+    CIA不是"数据性质"而是"研究者断言"：你必须论证为什么给定你选的那组 $X_i$ 后处理近似随机。这决定了CIA研究的真正工作量不在回归而在制度论证——谁能把处理分配的规则讲清楚，谁就有资格用CIA。
+  </div>
+</div>
+
+<p><span class="step-label conclusion">小结</span>
+潜在结果+选择偏误分解（3.2.1）把"比较≠因果"精确化；CIA（3.2.2）是消掉偏误的通行证——给定 $X_i$ 后处理像随机分配的那样好；多值处理下 $f_i(s)$ 把CIA推广到任意教育年限；迭代期望律把无数个条件效应汇总成两个可报告的估计（无条件效应、对处理者的效应），即匹配估计值的雏形。</p>
+
+<div class="skeleton-box">
+  <h4>★ Skeleton</h4>
+  <div class="sk-item"><span class="sk-label">起点：</span><span class="sk-content">§3.1的CEF只是统计概括，观察数据下"回归有因果解释"需要额外结构。</span></div>
+  <div class="sk-item"><span class="sk-label">工具：</span><span class="sk-content">潜在结果框架（第2章引入）+ 条件独立假设 + 迭代期望律。</span></div>
+  <div class="sk-item"><span class="sk-label">转折：</span><span class="sk-content">从"分解观察差距"转到"断言CIA"——公式只能展示偏误结构，消掉偏误靠的是假设而不是代数。</span></div>
+  <div class="sk-item"><span class="sk-label">内部次序：</span><span class="sk-content">Angrist高中故事建直觉 → 二值分解（3.2.1）→ CIA（3.2.2）→ 多值推广 $f_i(s)$ → 高中毕业示例与两类汇总效应。</span></div>
+  <div class="sk-item"><span class="sk-label">终点：</span><span class="sk-content">CIA下条件均值差=因果效应；汇总后得到无条件效应与对处理者效应（匹配估计值）。</span></div>
+  <div class="fragile"><span class="fragile-label">⚠️ 易断点：</span>式3.2.1里选择偏误为什么是 $\mathbb{E}[Y_{0i} \mid C_i=1] - \mathbb{E}[Y_{0i} \mid C_i=0]$ 而不是别的？——因为我们想要的是对处理者的效应（ATT），反事实缺失的恰好是"处理者的 $Y_{0i}$"。换一个目标效应（如ATE），偏误项的结构会变。分不清目标效应就分不清偏误。</div>
+</div>
+
+<p><span class="step-label significance">→</span>
+CIA是通行证，但它系于 $X_i$ 是否足够。$X_i$ 缺了重要变量会怎样？系数会偏成什么样？§3.2.2把"没控制好"量化。</p>
+
+<!-- §3.2.2 -->
+<h3 id="s32-2-1-2">§3.2.2 遗漏变量偏误公式 <a href="#toc" class="back-to-toc">↑Contents</a></h3>
+
+<p><span class="step-label q">Q</span>
+该控制的变量没控制，回归系数会偏多少、朝哪个方向偏？</p>
+
+<p><span class="step-label why">Why</span>
+CIA在实践中永远无法完全验证——"最大的问题在于这些协变量是什么以及应该是什么"（PDF第50页）。但研究者必须能说出"没控制好"的方向和大小，否则系数随控制变量加入的移动就成了不可解释的黑箱。遗漏变量偏误公式"是我们理解回归时最重要的公式之一"（PDF第56页）。</p>
+
+<div class="what-block">
+  <p><span class="step-label what">What</span></p>
+
+  <div class="wb-item operation">
+    <div class="wb-label">Operation</div>
+    这一小节回答：遗漏变量让系数偏多少、朝哪偏？答案一句话：偏误 = 遗漏变量效应 × 遗漏变量与已含变量的相关（OVB公式）。讲清楚需要四个子问题：能力变量缺位是常态吗、遗漏的后果怎么量化、偏误看得见吗、CIA成不成立由什么来管。
+  </div>
+
+  <div class="wb-item argument">
+    <div class="wb-label">论证过程</div>
+
+    <div class="arg-qa">
+      <p class="arg-q">能力变量进不了回归，是特殊情形还是常态？</p>
+      <p>是常态。考察长回归 $Y_i = \alpha + \rho S_i + A_i'\gamma + e_i$（式3.2.10），其中 $A_i$ 是"能力"——家庭背景、智力、动机的集合（PDF第54页）；给定 $A_i$ 若CIA成立，$\rho$ 就是因果效应。但美国当期人口调查CPS——应用微观经济学最常用的大型数据集、政府计算失业率的来源——"没有告诉我们任何关于被访者家庭背景、智商或者动机的信息"（PDF第55页）。能力必然被遗漏：短回归不是模型选择失误，而是数据条件下的现实。</p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">遗漏的后果有多大？</p>
+      <p>公式说得很具体。把长回归代入短回归系数公式 $\mathrm{cov}(Y_i, S_i)/V(S_i)$，化简即得遗漏变量偏误公式（式3.2.11，PDF第55页）：</p>
+      <p>$$\frac{\mathrm{cov}(Y_i, S_i)}{V(S_i)} = \rho + \gamma'\delta_{Ai} \tag{3.2.11}$$</p>
+      <p>其中 $\delta_{Ai}$ 是遗漏变量 $A_i$ 对 $S_i$ 回归的系数。一句话版本："短回归参数等于长回归参数加上一个数，这个数等于遗漏变量效应乘以遗漏变量对被包含变量的回归系数。"它其实是§3.1.2解构回归公式（3.1.3）的另一副面孔——遗漏变量与已含变量不相关（$\delta_{Ai}=0$）时，长短回归系数相同。方向直觉立即可得：能力对工资影响为正、又与教育正相关，短回归系数向上偏。但理论并不承诺偏误方向——"一些遗漏变量可能与教育水平是负相关的，在这些例子中短回归方程的系数又有可能偏小。"<span class="app-ref">推导详见 <a href="#s32-appendix-A1">Appendix A.1 ↓</a></span></p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">这个偏误看得见吗？</p>
+      <p>看得见——NLSY的表3.1（PDF第55-56页）。样本是1979年出生、2002年受访的2434名男性，按NLSY权重加权，被解释变量是对数工资。教育系数随控制变量加入一路下降：无控制0.132(0.007) → 加年龄虚拟变量0.131 → 加父母受教育年限、种族、地区0.114 → 加AFQT军方资格测验分数（能力代理）0.087 → 再加职业虚拟变量0.066。系数的不断下降"乃是与工资和教育水平都正相关的控制变量不断加入的结果"。这张表把抽象的 $\delta_{Ai}$ 变成了可观察的0.132→0.087——每加进一类控制变量，系数就朝真效应挪一步。</p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">公式管不了CIA成不成立——那什么管？</p>
+      <p>制度论证。CIA什么时候可信，有两条途径（PDF第56-57页）。其一，实验或自然实验中的随机分配：Black等（2003）研究美国对失业工人的强制再培训项目——入选资格取决于个体特征、失业记录与工作历史，而在"必须参加培训"的组别中当人数超过限额时，"接受培训的机会是以抽签的方式决定的"；给定分组协变量后培训状态随机，回归估计因此可信。英国的教育维持计划（EMA）为特定地区高中生支付学费，是同一逻辑的政策实验（Dearden等2003）。其二，制度知识：Angrist（1998）的志愿兵役研究——军方主要依据年龄、教育程度、考试分数筛选申请者，1979-1982年申请者中给定这些 $X_i$ 后，服役状态的差异来自"一些合格的申请者在最后一分钟没有被列入招募名单"。但紧接着的诚实承认同样重要：若这个"最后一分钟"的过程本身与潜在收入有关，CIA依然不成立——这种自我追问，正是"仔细把玩"制度细节的示范。</p>
+    </div>
+  </div>
+
+  <div class="wb-item points">
+    <div class="wb-label">Points</div>
+    OVB公式把你所有的"逐步加控制变量"回归变成一个诊断程序：系数随控制变量加入的移动方向和幅度，就是遗漏变量偏误存在及其方向的证据。如果加了一堆可观察变量后系数纹丝不动，你对不可观察变量的担忧仍然成立、但至少有了初步底气；如果大幅移动（如0.132→0.087），就要警惕不可观察变量也在驱动系数。
+  </div>
+</div>
+
+<p><span class="step-label conclusion">小结</span>
+OVB公式（3.2.11）量化"没控制好"：偏误=遗漏变量效应×遗漏变量与已含变量的相关；NLSY教育回报0.132→0.114→0.087的下降是活的演示；CIA可信的两条途径=自然实验的随机分配（Black等2003抽签、英国EMA）与制度知识（Angrist 1998军方筛选规则）；"如果你指出回归中不存在遗漏变量偏误，那等于说你得到的回归就是你想要的那个。"</p>
+
+<div class="skeleton-box">
+  <h4>★ Skeleton</h4>
+  <div class="sk-item"><span class="sk-label">起点：</span><span class="sk-content">CPS没有能力信息，短回归是现实；想知道遗漏的后果。</span></div>
+  <div class="sk-item"><span class="sk-label">工具：</span><span class="sk-content">长短回归系数替换（把长回归代入短回归系数公式）+ 解构回归公式（3.1.3）。</span></div>
+  <div class="sk-item"><span class="sk-label">转折：</span><span class="sk-content">从"公式推导"转到"制度论证"——偏误结构是代数，CIA是否成立是现实问题。</span></div>
+  <div class="sk-item"><span class="sk-label">内部次序：</span><span class="sk-content">场景搭建（CPS无能力变量）→ 推导（3.2.11）→ NLSY表3.1演示 → CIA可信的两条途径。</span></div>
+  <div class="sk-item"><span class="sk-label">终点：</span><span class="sk-content">偏误可量化、方向可判断；CIA的辩护必须落到随机分配的制度事实上。</span></div>
+  <div class="fragile"><span class="fragile-label">⚠️ 易断点：</span>OVB公式里的 $\delta_{Ai}$ 为什么是"$A_i$ 对 $S_i$ 回归"而不是"$S_i$ 对 $A_i$ 回归"？——把长回归代入短回归系数时，$A_i$ 的系数 $\gamma'$ 带出来的正是 $\mathbb{E}[A_iS_i]$ 结构，化简后恰好是 $A_i$ 对 $S_i$ 的回归系数。方向搞反，偏误的方向判断就全错。</div>
+</div>
+
+<p><span class="step-label significance">→</span>
+OVB公式暗示了一个反向风险：加变量并非越多越好——表3.1第五列加职业后系数降到0.066，却"很难解释是何种原因导致了这种下降"。为什么加了变量反而没法解释？§3.2.3给尺子。</p>
+
+<!-- §3.2.3 -->
+<h3 id="s32-2-1-3">§3.2.3 不合格的控制变量 <a href="#toc" class="back-to-toc">↑Contents</a></h3>
+
+<p><span class="step-label q">Q</span>
+什么样的控制变量是"合格"的？加错变量会怎样？</p>
+
+<p><span class="step-label why">Why</span>
+你现在面对实际决策：回归表里放哪些 $X_i$。表3.1的教训说明存在"加了反而坏事"的变量——加职业后系数变动却无法解释。"有些控制变量是不合格的控制变量，将其加入回归固然可以改变回归系数，但实际上却不该将其加入"（PDF第57页）。必须有一把尺子区分该加与不该加。</p>
+
+<div class="what-block">
+  <p><span class="step-label what">What</span></p>
+
+  <div class="wb-item operation">
+    <div class="wb-label">Operation</div>
+    这一小节回答：控制变量怎么选？答案一句话：只放"处理之前就被决定"的变量。讲清楚需要四个子问题：加变量是不是越多越好、控制结果型变量会怎样、拿不到理想控制用代理行不行、有没有统一判据。
+  </div>
+
+  <div class="wb-item argument">
+    <div class="wb-label">论证过程</div>
+
+    <div class="arg-qa">
+      <p class="arg-q">控制变量是不是越多越好？</p>
+      <p>不是。不合格的控制变量就是那些本身可作为实验结果的变量——"由于我们总是可以将经验研究想象为一个实验，所以不合格的控制变量就是那些可以作为实验结果的变量。也就是说，不合格的控制变量本身可作为被解释变量。合格的控制变量是指当我们选定回归元后，它的取值已经固定给出的那些变量"（PDF第57页）。直观场景：研究大学教育对收入的影响，职业 $W_i$ 与教育、收入都高度相关，看似该控制——"毕竟，职业选择和教育水平、收入都高度相关"，甚至"只在白领工人中考察该影响"听起来很合理。</p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">控制职业到底会怎样？</p>
+      <p>会制造新的选择偏误，即使教育是随机分配的。设 $C_i$ 随机分配、独立于一切潜在结果，潜在结果同时包括收入 $\{Y_{1i}, Y_{0i}\}$ 和职业 $\{W_{1i}, W_{0i}\}$。给定 $W_i=1$ 比较大学与非大学毕业生的收入差（式3.2.12，PDF第58页），比较的不是同类事物——它等于对"上大学后会成为白领的人"的因果效应，加上选择性偏误 $\mathbb{E}[Y_{0i} \mid W_{1i}=1] - \mathbb{E}[Y_{0i} \mid W_{0i}=1]$，后者反映"大学学历会改变白领工人组成"这一事实。最尖锐的结论："即使 $Y_{1i}=Y_{0i}$ 上大学对工资不具有因果效应，等式（3.2.12）也无法指出这一点"——处理无效应时，控制职业后的系数也可以不为零。表3.1第五列0.066就是这个陷阱的活例：我们无法解释这个下降。</p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">理想控制变量拿不到，用"代理"行不行？</p>
+      <p>行，但要付出稀释的代价（PDF第59-60页）。理想控制是八年级智力测验分数 $a_i$——"八年级又先于学生的任何接受教育的决策"，是合格控制变量；但数据往往只有教育完成后的"后天能力" $a_i^*$，且 $a_i^* = \pi_0 + \pi_1 S_i + \pi_2 a_i$（式3.2.14）——教育本身在提高后天能力。反解 $a_i$ 代入后，教育系数变成 $\rho - \gamma\pi_1/\pi_2$（式3.2.15）——真效应被稀释了 $\gamma\pi_1/\pi_2$。两个补救性结论：如果 $a_i^*$ 对 $S_i$ 回归结果为零，可以相当自信地断定 $\pi_1=0$、稀释为零；若 $a_i$ 对 $S_i$ 的回归系数 $\delta_{as}$ 为正，则"我们感兴趣的因果效应处在无控制变量估计量和加入代理控制变量得到的估计量之间"——真效应被两个估计夹住了。</p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">有没有一条统一判据，区分该加与不该加？</p>
+      <p>有——时间先后："对不合格控制变量和代理性控制变量都适用的一个挑选准则是：考虑控制变量被决定的时间。一般来说在我们感兴趣的变量产生之前就被决定的变量都是好的控制变量"（PDF第60页）。先被决定的变量不可能是因果链条的产物；时间不确定时，必须做出哪个变量先被决定的假设，或者说明没有任何一个控制变量被感兴趣的变量所影响。一条时间轴，压倒了所有技术细节。</p>
+    </div>
+  </div>
+
+  <div class="wb-item points">
+    <div class="wb-label">Points</div>
+    坏控制的本质是"把因果链条的下游产物放进了上游"——它是§3.2.1选择偏误的镜像：那里是漏掉上游，这里是堵住下游。判断口诀只有一条：这个变量在处理之前被决定了吗？机制变量（中介）的回答永远是"没有"，所以机制变量进主回归必然出事，它们的位置是被解释变量一侧。
+  </div>
+</div>
+
+<p><span class="step-label conclusion">小结</span>
+不合格控制变量=本身是处理结果的变量：控制职业（白领/蓝领）后即使教育无因果效应系数也可不为零（3.2.12），表3.1第五列0.066不可解释；代理控制变量即使合格也稀释真效应（3.2.15），但比不加好、真效应夹在两个估计之间；统一判据=时间先后——处理之前被决定的变量是好控制变量。</p>
+
+<div class="skeleton-box">
+  <h4>★ Skeleton</h4>
+  <div class="sk-item"><span class="sk-label">起点：</span><span class="sk-content">OVB公式只说了"缺了会偏"，没说"多了会坏"；表3.1第五列暴露了这个盲区。</span></div>
+  <div class="sk-item"><span class="sk-label">工具：</span><span class="sk-content">潜在结果框架（收入和职业双重潜在结果）+ 随机化设定下的分解。</span></div>
+  <div class="sk-item"><span class="sk-label">转折：</span><span class="sk-content">从"控制变量消除偏误"转到"控制变量可以制造偏误"——同一个动作，方向相反的效果。</span></div>
+  <div class="sk-item"><span class="sk-label">内部次序：</span><span class="sk-content">定义（结果型变量）→ 白领例子正式分析（3.2.12）→ 代理变量稀释（3.2.14/3.2.15）→ 时间先后判据。</span></div>
+  <div class="sk-item"><span class="sk-label">终点：</span><span class="sk-content">好控制=处理之前就被决定的变量；坏控制=处理的结果；代理控制=稀释但优于不加。</span></div>
+  <div class="fragile"><span class="fragile-label">⚠️ 易断点：</span>白领例子中 $C_i$ 被假设随机分配，为什么控制 $W_i$ 还会出偏误？——随机化保证的是"处理与潜在结果独立"，但控制 $W_i=1$ 后比较的两组人由不同的潜在职业决定（$W_{1i}=1$ vs $W_{0i}=1$），随机化在这个条件下不再"穿透"。跟丢这一点，就会误以为"实验数据随便加控制都安全"。</div>
+</div>
+
+<p><span class="step-label significance">→</span>
+本节闭环：CIA给了通行证、OVB给了代价、坏控制给了边界。但这套因果语言全程站在"线性+常数效应"的窄路上——§3.2开头承认的第二条更一般的路线（回归=加权平均的匹配估计量）还没走。§3.3走。</p>
+
+<!-- §3 完整逻辑链 -->
+<h2 id="s32-3">§3 · The Thread <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<p>本节的全部论证是一条"立证、量化、设防"的链。从§3.1留下的缺口——"回归何时有因果解释"——出发，先引入潜在结果与CIA：把"观察到的差距=因果效应+选择性偏误"这个分解摆上桌面，说明只有给定 $X_i$ 后处理"就像被随机分配的那样好"，偏误才会消失；接着证明在CIA加线性常数效应假设下，长回归的 $\rho$ 就是因果效应——完成从统计工具到因果工具的翻译；然后用遗漏变量偏误公式把CIA失败的方向和大小具体化，NLSY教育回报从0.132降到0.087的演示给出了可观察证据，并说明CIA何时可信：自然实验的随机分配（Black等2003的抽签、英国教育维持计划）与制度知识（Angrist 1998的军方筛选规则）；最后反向设防——控制变量并非多多益善：本身是结果变量的坏控制会制造新的选择性偏误（白领职业例子），代理变量会把真效应掺进稀释（后天能力例子），统一准则落在一个问题上：变量何时被决定。</p>
+
+<!-- §3.5 本节小结 -->
+<h2 id="s32-3-5">§3.5 · 本节小结 <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<div class="chapter-summary">
+  <h3>一句话总览</h3>
+  <p><strong>回归获得因果解释的全部代价浓缩为一个假设：给定你放入回归的 $X_i$，处理就像随机分配的（CIA）。它带来的回报是OVB公式（告诉你没控制好的方向和大小）和一条选控制变量的铁律（变量必须在处理之前被决定）。</strong></p>
+
+  <h3>三个子问题的答案回顾</h3>
+  <p><strong>什么条件消除选择偏误？</strong>CIA——给定 $X_i$ 后潜在结果与处理独立。观察差距=因果效应+选择偏误（3.2.1），CIA把偏误项消掉（3.2.2）；多值处理用收入函数 $f_i(s)$ 推广；迭代期望律把条件效应汇总成无条件效应与对处理者效应。</p>
+  <p><strong>没控制好偏多少？</strong>OVB公式（3.2.11）：偏误=遗漏变量效应×遗漏变量与已含变量的相关。NLSY演示：教育系数0.132→0.114→0.087。CIA可信的两条途径：自然实验的随机分配（抽签、EMA）与制度知识（军方筛选规则）。</p>
+  <p><strong>加错变量会怎样？</strong>结果型变量（职业）制造新偏误——即使处理无效应，系数也可不为零；代理控制稀释真效应但优于不加（真效应夹在两个估计之间）；统一判据：变量在处理之前被决定。</p>
+
+  <h3>最该带走的三点</h3>
+  <p>① CIA是断言不是数据性质——真正的论证工作量在制度规则，不在回归命令；② 逐步加控制变量的系数移动就是你的偏误诊断程序（稳定=证据，大幅移动=警惕）；③ 主回归的控制变量逐一过"时间先后"关，机制变量永远放被解释变量一侧。</p>
+</div>
+
+<!-- §4 Implications -->
+<h2 id="s32-4">§4 · Implications <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<div class="implications">
+  <div class="pair">
+    <div class="book-says">观察差距分解（3.2.1）：简单比较处理组与对照组=因果效应+选择性偏误；CIA即"给定 $X_i$ 后处理像随机分配的那样好"（PDF第50-51页）。</div>
+    <div class="for-you">受301调查影响的企业与未受影响企业本来就不同（出口规模、行业、地区），简单比较OFDI差异就是被选择偏误污染的比较。你的识别依赖平行趋势假设——逻辑同构于"给定固定效应和控制变量后，处理分配与潜在结果的变化独立"。写论文时，"选择偏误来自可观察变量"就是你加入企业年龄、参保人数、规模层级等控制变量的理由。</div>
+  </div>
+  <div class="pair">
+    <div class="book-says">CIA可信度来自制度知识——Angrist（1998）依赖"军方按年龄、教育、考试分数筛选"的规则，Black等（2003）依赖抽签（PDF第56-57页）。</div>
+    <div class="for-you">301调查的"处理"如何分配是制度问题：美国贸易代表办公室依据对美出口规模、行业类别等规则确定调查清单。你的论文必须写清楚这一制度逻辑——处理组的入选规则是什么、给定哪些可观察变量后处理近似随机——这决定你的控制变量和固定效应选择是否有依据，也是审稿人追问的第一处。</div>
+  </div>
+  <div class="pair">
+    <div class="book-says">OVB公式——短回归系数=长回归系数+遗漏变量效应×遗漏变量对包含变量的回归系数；NLSY系数随控制变量加入从0.132降至0.087（PDF第55-56页）。</div>
+    <div class="for-you">你的基准回归恰好是逐步加控制变量（模型1→2→3）。treat_post系数的移动方向和幅度就是遗漏变量偏误的指示器：系数稳定，说明处理与可观察特征相关性弱；大幅移动，则要警惕不可观察特征也在驱动系数。把"系数是否稳定"作为稳健性论据写进论文。</div>
+  </div>
+  <div class="pair">
+    <div class="book-says">不合格控制变量=本身是结果的变量；即使处理无因果效应，控制这类变量后系数也可以不为零——表3.1加职业后0.087降到0.066但无法解释（PDF第57-58页）。</div>
+    <div class="for-you">机制变量（出口行为、生产效率、融资约束）受301调查和OFDI共同影响，绝不能放进主回归做控制——否则系数变动无法解释。机制变量的正确位置是作为被解释变量单独回归，而不是当控制变量。</div>
+  </div>
+  <div class="pair">
+    <div class="book-says">好控制变量的时间准则——在处理之前就被决定的变量是合格的；代理变量虽会稀释真效应，但比不加好，真实效应位于无控制与加代理控制的两个估计之间（PDF第59-60页）。</div>
+    <div class="for-you">逐一审查你的控制变量——"已成立年份"先于2018年政策，天然合格；"参保人数"和"规模层级"若在政策后测度、且企业可能因301调查裁员或收缩，就有坏控制嫌疑，需说明测度时点或按代理变量逻辑谨慎解释。</div>
+  </div>
+</div>
+
+<!-- §5 Takeaway -->
+<h2 id="s32-5">§5 · Takeaway <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<div class="takeaway">
+  CIA是把回归从统计工具变成因果工具的通行证：满足它，ρ就是因果效应；不满足，OVB公式告诉你偏误的方向；选控制变量时，只放"在处理之前就被决定"的变量。
+</div>
+
+<!-- §6 Next -->
+<h2 id="s32-6">§6 · Next <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<ul class="todo-list">
+  <li class="pri-1">观察差距分解（3.2.1）与CIA定义——你所有因果解释的根基</li>
+  <li class="pri-1">OVB公式及"系数随控制变量如何移动"的读法（表3.1演示）——你的偏误诊断程序</li>
+  <li class="pri-1">不合格控制变量的判定与时间先后准则——直接约束你的主回归和机制分析</li>
+  <li class="pri-2">匹配估计的两步走细节——§3.3.1才正式展开</li>
+  <li class="pri-2">线性因果模型 $f_i(s)$ 的形式化处理——用到时回看</li>
+  <li class="pri-2">代理变量公式（3.2.14/3.2.15）的代数推导——见Appendix A.2</li>
+</ul>
+
+<!-- Appendix A -->
+<h2 id="s32-appendix-a">Appendix A · 公式详细推导 <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<h3 id="s32-appendix-A1">A.1 观察差距分解与OVB公式（式3.2.1/3.2.11） <a href="#s32-2-1-2" class="app-back">↩正文</a></h3>
+<div class="derivation-step">
+  <strong>起点：</strong>$Y_i = Y_{0i} + (Y_{1i} - Y_{0i})C_i$，只能观察 $Y_{1i}$ 或 $Y_{0i}$ 之一。处理组均值 $\mathbb{E}[Y \mid C=1] = \mathbb{E}[Y_{1i} \mid C=1]$，对照组均值 $\mathbb{E}[Y \mid C=0] = \mathbb{E}[Y_{0i} \mid C=0]$。
+</div>
+<div class="derivation-step">
+  <strong>第1步：</strong>相减并加减 $\mathbb{E}[Y_{0i} \mid C=1]$：
+  $$\mathbb{E}[Y \mid C=1] - \mathbb{E}[Y \mid C=0] = \underbrace{\mathbb{E}[Y_{1i}-Y_{0i} \mid C=1]}_{\text{处理的平均因果效应}} + \underbrace{\{\mathbb{E}[Y_{0i} \mid C=1] - \mathbb{E}[Y_{0i} \mid C=0]\}}_{\text{选择性偏误}} \tag{3.2.1}$$
+  第一项=ATT（对处理者的效应），第二项=选择性偏误（处理组与对照组"未处理收入"的差距）。
+</div>
+<div class="derivation-step">
+  <strong>第2步（OVB）：</strong>长回归 $Y_i = \alpha + \rho S_i + A_i'\gamma + e_i$，其中 $e_i$ 与所有回归元不相关（总体回归残差的定义）。短回归（只有 $S_i$）的系数是 $\mathrm{cov}(Y,S)/V(S)$。把长回归代入分子：
+  $$\mathrm{cov}(Y_i, S_i) = \rho V(S_i) + \gamma'\mathrm{cov}(A_i, S_i) + \mathrm{cov}(e_i, S_i)$$
+  最后一项为0（$e$ 与 $S$ 不相关）。两边除以 $V(S_i)$：
+  $$\frac{\mathrm{cov}(Y_i, S_i)}{V(S_i)} = \rho + \gamma'\frac{\mathrm{cov}(A_i, S_i)}{V(S_i)} = \rho + \gamma'\delta_{Ai} \tag{3.2.11}$$
+  其中 $\delta_{Ai}$ 恰是 $A_i$ 对 $S_i$ 回归的系数。遗漏变量与已含变量不相关（$\delta_{Ai}=0$）时，长短回归系数相同——这正是解构回归公式（3.1.3）的另一副面孔。
+</div>
+
+<h3 id="s32-appendix-A2">A.2 坏控制偏误与代理变量稀释（式3.2.12/3.2.15） <a href="#s32-2-1-3" class="app-back">↩正文</a></h3>
+<div class="derivation-step">
+  <strong>起点：</strong>$C_i$ 随机分配（独立于一切潜在结果），潜在结果有收入 $\{Y_{1i},Y_{0i}\}$ 与职业 $\{W_{1i},W_{0i}\}$ 两套。
+</div>
+<div class="derivation-step">
+  <strong>第1步：</strong>给定 $W=1$ 比较收入差：$\mathbb{E}[Y \mid W=1, C=1] - \mathbb{E}[Y \mid W=1, C=0] = \mathbb{E}[Y_{1i} \mid W_{1i}=1, C=1] - \mathbb{E}[Y_{0i} \mid W_{0i}=1, C=0]$；由独立性与 $C_i$ 无关：
+  $$= \mathbb{E}[Y_{1i} \mid W_{1i}=1] - \mathbb{E}[Y_{0i} \mid W_{0i}=1] = \underbrace{\mathbb{E}[Y_{1i}-Y_{0i} \mid W_{1i}=1]}_{\text{因果效应}} + \underbrace{\{\mathbb{E}[Y_{0i} \mid W_{1i}=1]-\mathbb{E}[Y_{0i} \mid W_{0i}=1]\}}_{\text{选择性偏误}} \tag{3.2.12}$$
+  偏误来自"大学学历改变了白领群体的构成"——$Y_{1i}=Y_{0i}$ 时它也不为0。
+</div>
+<div class="derivation-step">
+  <strong>第2步（代理变量）：</strong>真模型 $Y = \alpha + \rho S + \gamma a + e$（$a$=八年级先天能力）；后天能力 $a^* = \pi_0 + \pi_1 S + \pi_2 a$（式3.2.14）。反解 $a = (a^* - \pi_0 - \pi_1 S)/\pi_2$ 代入：
+  $$Y_i = \left(\alpha - \gamma\frac{\pi_0}{\pi_2}\right) + \left(\rho - \gamma\frac{\pi_1}{\pi_2}\right)S_i + \frac{\gamma}{\pi_2}a_i^* + e_i \tag{3.2.15}$$
+  教育系数被稀释 $\gamma\pi_1/\pi_2$；$\pi_1=0$（$a^*$ 对 $S$ 回归为零）时无损。
+</div>
+
+<!-- Appendix B -->
+<h2 id="s32-appendix-b">Appendix B · 补充材料与延伸阅读 <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<h3>B.1 表3.1数据（NLSY教育回报）</h3>
+<table>
+  <tr><th>设定</th><th>系数(标准误)</th><th>解读</th></tr>
+  <tr><td>无控制</td><td>0.132 (0.007)</td><td>短回归，向上偏</td></tr>
+  <tr><td>+年龄虚拟变量</td><td>0.131 (0.007)</td><td>年龄几乎不影响教育系数</td></tr>
+  <tr><td>+父母受教育年限、种族、地区</td><td>0.114 (0.007)</td><td>家庭背景控制后明显下降</td></tr>
+  <tr><td>+AFQT分数（能力代理）</td><td>0.087 (0.009)</td><td>能力控制后再降一大步</td></tr>
+  <tr><td>+职业虚拟变量</td><td>0.066 (0.010)</td><td>坏控制：下降无法解释</td></tr>
+</table>
+<p>样本：NLSY 1979年出生、2002年受访的2434名男性，按NLSY权重加权，被解释变量为对数工资。</p>
+
+<h3>B.2 引用文献速查</h3>
+<table>
+  <tr><th>引用</th><th>页码</th><th>本节中的作用</th></tr>
+  <tr><td>Goldberger (1972)</td><td>p050</td><td>"选择偏误来自可观察变量"的早期表述</td></tr>
+  <tr><td>Barnow, Cain &amp; Goldberger (1981)</td><td>p050, 054</td><td>针对回归的选择偏误讨论；该假设成为经验研究的基础</td></tr>
+  <tr><td>Black et al. (2003)</td><td>p056</td><td>强制再培训项目：限额内抽签分配培训（CIA可信的自然实验）</td></tr>
+  <tr><td>Dearden et al. (2003)</td><td>p056</td><td>英国教育维持计划（EMA）政策实验</td></tr>
+  <tr><td>Angrist (1998)</td><td>p057</td><td>志愿兵役研究：军方按年龄/教育/考分筛选的制度知识</td></tr>
+  <tr><td>Robert Frost</td><td>p049</td><td>《未选择的路》——潜在结果的人生直觉</td></tr>
+</table>
+
+<h3>B.3 Stata实操对应</h3>
+<pre><code>* 逐步加控制变量=偏误诊断程序（表3.1）
+regress lwage educ, robust
+regress lwage educ age_dummies, robust
+regress lwage educ age_dummies parent_educ race region, robust
+regress lwage educ age_dummies parent_educ race region afqt, robust
+
+* 判断代理变量的稀释：a* 对 S 回归是否为零
+regress a_star S   // 系数为零 → pi_1=0，代理无损
+</code></pre>
+
+<h3>B.4 本节在全章中的位置</h3>
+<div class="problem-tree">
+  <div class="root-q">§3.2在§3.1的统计地基上嫁接因果结构。</div>
+  <ul class="tree-list">
+    <li>§3.1：回归的统计学身份——CEF近似 + 渐进推断</li>
+    <li>§3.2（本节）：因果条件——CIA、OVB公式、坏控制</li>
+    <li>§3.3：异质性——撤掉常数效应假设，回归=加权平均的匹配估计量</li>
+    <li>§3.4：操作细节——加权回归、有限被解释变量、命名史</li>
+  </ul>
+</div>
+
+<!-- §0 前置定位 -->
+<h2 id="s33-0">§0 · Prelude <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<p>§3.2完成了回归的因果化，但全程站在一条窄路上：线性因果模型加常数效应（$f_i(s) = \alpha + \rho s + \eta_i$）。§3.2其实点过第二条更一般的路——"即使允许 $f_i(s)$ 因人而异，允许 $f_i(s)$ 是非线性的，回归还是为我们提供了一个估计特定个体因果效应加权平均值的工具"（PDF第53页），并预告"回归是一种匹配估计量"（PDF第60页）。本节兑现这个预告：撤掉线性与常数效应假设，回答回归在异质性世界里到底估计什么，以及匹配、倾向评分与回归三者究竟是什么关系。</p>
+
+<!-- §1 总问题树 -->
+<h2 id="s33-1">§1 · The Question <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<div class="problem-tree">
+  <div class="root-q">本节总问题：当因果效应因人而异、条件期望函数非线性时，回归系数到底在估计什么——它和匹配、倾向评分这些"替代工具"之间又是什么关系？</div>
+  <ul class="tree-list">
+    <li><a href="#s33-2-1-1">§3.3.1</a> 效应异质时回归估计什么：方差加权的匹配估计量
+      <ul class="tree-sublist"><li>δ_R=条件方差加权的δ_x平均；表3.2演示与匹配的显著分歧</li></ul>
+    </li>
+    <li><a href="#s33-2-1-2">§3.3.2</a> 协变量太多怎么降维：倾向评分定理与IPW
+      <ul class="tree-sublist"><li>降维无损；回归/匹配/PSM同属一个加权估计族</li></ul>
+    </li>
+    <li><a href="#s33-2-1-3">§3.3.3</a> 实践中用哪个：NSW实验与Lalonde教训
+      <ul class="tree-sublist"><li>回归为默认起点，倾向评分担任修剪与验证的辅助</li></ul>
+    </li>
+  </ul>
+</div>
+
+<!-- §3.3.1 -->
+<h3 id="s33-2-1-1">§3.3.1 回归=方差加权的匹配估计量 <a href="#toc" class="back-to-toc">↑Contents</a></h3>
+
+<p><span class="step-label q">Q</span>
+效应因人而异时，回归系数究竟在估计什么？</p>
+
+<p><span class="step-label why">Why</span>
+§3.2的因果解读建立在"效应对所有人相同"的线性常数效应模型上，但本节标题就是"异质性"——现实中 $f_i(s)$ 几乎必然因人而异。§3.2开头就预告过第二条路：回归是"估计特定个体因果效应 $f_i(s)-f_i(s-1)$ 的加权平均值的工具"（PDF第53页）。如果不把这个预告兑现，异质性下的因果解读就是悬空的：报告的0.0674到底是谁的效应？</p>
+
+<div class="what-block">
+  <p><span class="step-label what">What</span></p>
+
+  <div class="wb-item operation">
+    <div class="wb-label">Operation</div>
+    这一小节回答：效应异质时回归系数是什么？答案一句话：它是各协变量组效应 $\delta_x$ 的加权平均，权重是处理的条件方差（式3.3.7）——回归是一种特殊加权的匹配估计量。讲清楚需要四个子问题：匹配怎么估计异质效应、回归系数等价于什么、权重不同差多少、无交叠与连续处理怎么办。
+  </div>
+
+  <div class="wb-item argument">
+    <div class="wb-label">论证过程</div>
+
+    <div class="arg-qa">
+      <p class="arg-q">匹配是怎么估计异质性下的因果效应的？</p>
+      <p>机制"简单到令人心动"（PDF第61-62页）：对协变量每个取值x决定的组别，计算处理-控制平均差 $\delta_x = \mathbb{E}[Y \mid X=x, D=1] - \mathbb{E}[Y \mid X=x, D=0]$，再用权重汇总——用处理组中 $X_i$ 的分布加权得 $\delta_{TOT}$（式3.3.2），用 $X_i$ 边际分布加权得 $\delta_{ATE}$（式3.3.3）。Angrist（1998）正是这样做的：协变量取出生年份、AFQT考分、申请年份、申请时教育水平的全部组合，对每个组算参军者与未参军者的收入差，再按参军者中协变量的分布加权——$\delta_{TOT}$ 是"参军对代表性士兵带来的收入增减量"，$\delta_{ATE}$ 是"代表性申请者的收入增减量"（PDF第62页）。</p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">回归系数在这种框架下等于什么？</p>
+      <p>等于对同一批 $\delta_x$ 的另一种加权平均。对饱和回归 $Y_i = \sum d_{ix}\alpha_x + \delta_R D_i + e_i$（式3.3.4——每个协变量组一个虚拟变量，但对 $D_i$ 无交互项），用解构回归公式写出 $\delta_R = \mathrm{cov}(Y,\tilde{D})/V(\tilde{D})$；关键代换是对 $Y_i$ 关于 $X_i$ 和 $D_i$ 回归等价于对 $Y_i$ 关于 $\mathbb{E}[Y \mid D,X]$ 回归（定理3.1.6）；把 $\mathbb{E}[Y \mid D,X] = \mathbb{E}[Y \mid D=0,X] + \delta_X D_i$ 代入，第一项与 $\tilde{D}$ 正交消失，最终（式3.3.7，PDF第64页）：</p>
+      <p>$$\delta_R = \frac{\mathbb{E}[\sigma_D^2(X_i)\delta_X]}{\mathbb{E}[\sigma_D^2(X_i)]}, \qquad \sigma_D^2(X_i) \equiv \mathbb{E}[(D_i - \mathbb{E}[D_i \mid X_i])^2 \mid X_i] \tag{3.3.7}$$</p>
+      <p>回归系数=各组效应 $\delta_x$ 的加权平均，权重是处理的条件方差。$D_i$ 是虚拟变量时 $\sigma_D^2(x) = P(D=1 \mid x)(1-P(D=1 \mid x))$，在 $P=1/2$ 处最大——"回归估计值将最大权重赋予条件方差最大的那组个体的处理效应……被处理者和被控制者数量相同的组别会被回归赋予最大权重"；而匹配的权重与处理概率成正比、最大权重给"最可能被处理的那组"（PDF第65页）。<span class="app-ref">推导详见 <a href="#s33-appendix-A1">Appendix A.1 ↓</a></span></p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">权重不同，结果会差多少？</p>
+      <p>可以差到统计显著（表3.2，PDF第63页）。数据：1979-1982年申请入伍的男性，收入来自1988-1991年社保账户纳税收入；样本128968位白人、175262位非白人；控制出生年份、申请时教育水平、AFQT考分。白人组：参军者比未参军者平均多赚1233.4美元；匹配后变成-197.2，回归后-88.8。非白人组：原始差2449.1，匹配后839.7，回归后1074.4。匹配与回归的差（108.4(28.5)和234.7(32.5)）在统计上显著。原因藏在权重结构里："看上去最愿意加入军队的那些男性从服役中获得的收益最小。这大概是因为最愿意服役的那些人最适合于服役，因而具有最高的潜在收入"——匹配按参军概率加权，把最大权重给了受益最小的组，所以匹配估计小于回归估计。</p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">没有交叠的组怎么办？连续处理怎么办？</p>
+      <p>没有交叠的组，两种方法都自动弃权（PDF第65-66页）：对"全是处理者或全是控制者"的协变量组，回归权重 $\sigma_D^2(x)$ 与匹配权重都为零——"这两种方法只对既存在被处理者，又存在控制者的组别进行加权平均"，这就是共同支撑。连续处理时，回归系数是CEF导数的加权平均（Yitzhaki 1996，式3.3.8/3.3.9），权重在中位数附近最大（$P(S \geq t)[1-P(S \geq t)]$ 在那里被最大化）；$S_i$ 正态时退化为 $\mathrm{cov}(Y,S)/V(S) = \mathbb{E}[h'(S_i)]$——回归系数恰好等于平均导数（PDF第68页，用Johnson和Kotz 1970的截尾正态公式）。这里还埋了一个预告："从参数型非线性模型中构造出的平均导数（也被称为'边际效应'）往往和线性回归结果的差别不大"——§3.4.2的伏笔。</p>
+    </div>
+  </div>
+
+  <div class="wb-item points">
+    <div class="wb-label">Points</div>
+    OLS不给"平均"——它给"方差最大的那部分人的效应"的加权平均。如果你的处理效应异质且与处理概率相关（几乎总是如此），OLS估计量可能离你关心的ATT相当远；想报告ATT，权重必须换成处理概率（匹配），或者干脆用交互项把加权结构拆开报告。
+  </div>
+</div>
+
+<p><span class="step-label conclusion">小结</span>
+异质性下回归系数有精确的因果身份：$\delta_R$ = 条件方差加权的 $\delta_x$ 平均（3.3.7）；匹配以处理概率加权，两者仅在处理与协变量无关时重合；老兵数据（表3.2）中匹配与回归的显著分歧来自权重差异；连续处理下系数是导数的加权平均（Yitzhaki），正态时恰为平均导数；两者都不给无交叠组赋权（共同支撑）。</p>
+
+<div class="skeleton-box">
+  <h4>★ Skeleton</h4>
+  <div class="sk-item"><span class="sk-label">起点：</span><span class="sk-content">§3.2的常数效应假设不可辩护，§3.2预告过"回归=加权平均的匹配估计量"。</span></div>
+  <div class="sk-item"><span class="sk-label">工具：</span><span class="sk-content">解构回归公式（3.3.5）+ 定理3.1.6（对Y回归=对CEF回归）+ 分解性质的正交性。</span></div>
+  <div class="sk-item"><span class="sk-label">转折：</span><span class="sk-content">权重从"处理概率"换成"条件方差"——同一个 $\delta_x$ 族，两种加权哲学，分歧可统计显著（表3.2）。</span></div>
+  <div class="sk-item"><span class="sk-label">内部次序：</span><span class="sk-content">匹配结构摊开 → $\delta_R$ 三等式推导 → 表3.2权重分歧演示 → 共同支撑与连续处理延伸。</span></div>
+  <div class="sk-item"><span class="sk-label">终点：</span><span class="sk-content">回归=特殊加权的匹配估计量（方差加权）；"回归和匹配之间的区别看上去并不很重要"。</span></div>
+  <div class="fragile"><span class="fragile-label">⚠️ 易断点：</span>式3.3.6第三个等号凭什么说"对 $Y_i$ 关于 $X_i$ 和 $D_i$ 回归等价于对 $Y_i$ 关于 $\mathbb{E}[Y \mid D,X]$ 回归"？——这是定理3.1.6（CEF回归定理）的推论：线性近似目标从 $Y_i$ 换成CEF后解不变。这个代换是整个推导的枢纽，没看懂它，后面的化简都像魔术。</div>
+</div>
+
+<p><span class="step-label significance">→</span>
+匹配需要按 $X_i$ 的每个取值分组——协变量连续、高维时根本做不了。"匹配估计量往往包含只有很少观察值的协变量"（PDF第66页）。有没有办法降维而不损失CIA？§3.3.2的倾向评分定理正面回答。</p>
+
+<!-- §3.3.2 -->
+<h3 id="s33-2-1-2">§3.3.2 倾向评分：降维定理与逆概率加权 <a href="#toc" class="back-to-toc">↑Contents</a></h3>
+
+<p><span class="step-label q">Q</span>
+协变量太多没法匹配，怎么降维而不破坏CIA？</p>
+
+<p><span class="step-label why">Why</span>
+你此刻的困境很实际：$X_i$ 是连续的、高维的，按每个x分组的匹配在有限样本里根本做不了。需要一个降维方案，而且降维必须被证明"CIA在降维后仍然成立"——否则就是用更弱的假设冒充CIA。</p>
+
+<div class="what-block">
+  <p><span class="step-label what">What</span></p>
+
+  <div class="wb-item operation">
+    <div class="wb-label">Operation</div>
+    这一小节回答：怎么降维而不损失CIA？答案一句话：控制处理概率本身就够了——倾向评分定理。讲清楚需要四个子问题：有没有降维无损的定理、怎么用它做估计、它和回归是什么关系、为什么Hahn说它渐进低效。
+  </div>
+
+  <div class="wb-item argument">
+    <div class="wb-label">论证过程</div>
+
+    <div class="arg-qa">
+      <p class="arg-q">有没有一种降维，能证明CIA不受损？</p>
+      <p>有——倾向评分定理（Rosenbaum和Rubin 1983，定理3.3.1，PDF第68-69页）。倾向评分定义为 $p(X_i) \equiv \mathbb{E}[D_i \mid X_i] = \mathbb{P}[D_i = 1 \mid X_i]$。定理说：若CIA成立（$\{Y_{0i}, Y_{1i}\} \perp\!\!\!\perp D_i \mid X_i$），则 $\{Y_{0i}, Y_{1i}\} \perp\!\!\!\perp D_i \mid p(X_i)$——控制这一个一维标量就等价于控制整个 $X_i$。证明只用迭代期望律四行：</p>
+      <p>$$\mathbb{P}[D_i = 1 \mid Y_{ji}, p(X_i)] = \mathbb{E}\{\mathbb{E}[D_i \mid Y_{ji}, p(X_i), X_i] \mid Y_{ji}, p(X_i)\} = \mathbb{E}\{\mathbb{E}[D_i \mid Y_{ji}, X_i] \mid Y_{ji}, p(X_i)\} = \mathbb{E}\{p(X_i) \mid Y_{ji}, p(X_i)\} = p(X_i)$$</p>
+      <p>最后结果与 $Y_{ji}$ 无关，证毕。"我们唯一需要控制的协变量就是处理概率本身"（PDF第69页）。§3.1.1的迭代期望律在这里又一次充当引擎。<span class="app-ref">推导详见 <a href="#s33-appendix-A2">Appendix A.2 ↓</a></span></p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">怎么用它做估计？</p>
+      <p>两步走（PDF第69页）：先用logit或probit估计 $p(X_i)$，再按评分匹配或加权（综述见Imbens 2004）。匹配路径：对 $\mathbb{E}[Y \mid p(X), D=1] - \mathbb{E}[Y \mid p(X), D=0]$ 按处理组分布加权；Dehejia和Wahba（1999）同时用了评分分层与非参数平滑；Heckman、Ichimura和Todd（1998）用模型估计条件均值后连加。更巧妙的路是逆概率加权（PDF第70页）：</p>
+      <p>$$\mathbb{E}[Y_{1i}-Y_{0i}] = \mathbb{E}\left[\frac{(D_i - p(X_i))Y_i}{p(X_i)(1-p(X_i))}\right] \tag{3.3.11}$$</p>
+      <p>（Newey 1990；Robins、Mark和Newey 1992），TOT版本是式3.3.12。用被选概率加权调整非随机抽样的思想追溯到Horvitz和Thompson（1952）。"由于Horvitz-Thompson给出的倾向评分法无需繁琐的匹配，从本质上讲估计值是自动获得的，所以该方法具有相当的吸引力。"</p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">这个估计和回归有关系吗？</p>
+      <p>有——它们是一个家族。回归 $\delta_R$ 用倾向评分语言可以写成（式3.3.13）：$\delta_R = \mathbb{E}[(D_i - p(X_i))Y_i] / \mathbb{E}[p(X_i)(1-p(X_i))]$；它与Horvitz-Thompson的ATE/TOT都属于Hirano、Imbens和Ridder（2003）的加权估计族（式3.3.14）：$\mathbb{E}\{g(X_i)[Y_iD_i/p(X_i) - Y_i(1-D_i)/(1-p(X_i))]\}$——$g(X)=1$ 给ATE，$g(X)=p(X)/\mathbb{P}(D=1)$ 给TOT，$g(X)=p(1-p)/\mathbb{E}[p(1-p)]$ 给回归。"这种相似性再次凸显出回归和匹配——包括倾向评分匹配——相互之间没有太多的差异，至少我们在对某个模型制定倾向评分函数的具体形式之前，它们都是相同的。"</p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">那为什么Hahn（1998）说倾向评分匹配渐进低效？</p>
+      <p>Hahn的结论：从渐进有效性看，用协变量匹配永远优于用倾向评分匹配——即使某协变量不影响处理（无偏误问题），只要它能解释结果，纳入匹配就提高精度（例：Angrist 1998里出生年份与服役无关但与收入有关，按出生年份匹配大幅提高有效性）。既然低效，为什么还要用？三层回答（PDF第71-72页）。哲学层：研究者对"处理如何被分配"有信息优势——Angrist和Kuersteiner（2004）指出相比于决定GDP的过程，我们对美联储如何决定利率了解得多得多；查验处理分配模型比查验结果决定模型容易得多（另见Rosenbaum和Rubin 1985）。有限样本层：Angrist和Hahn（2004）证明基于倾向评分的估计在有限样本可提高精度——NLSY有上百个可预测结果的协变量，与其背上估计它们的重负，不如只关注预测处理的那一小撮。渐进层：Hirano、Imbens和Ridder（2003）证明用非参数方法估计评分再加权，可以恢复有效性。收尾立场（PDF第72页）：如果你不准备对匹配问题做平滑、限制或降维，"那么你应该使用基于所有协变量的匹配，或者使用饱和回归来控制协变量"。</p>
+    </div>
+  </div>
+
+  <div class="wb-item points">
+    <div class="wb-label">Points</div>
+    倾向评分把"控制所有协变量"压缩成"控制一个数"，其合法性有定理背书（3.3.1）、代价是有效性损失（Hahn悖论）。它最深刻的价值不在估计而在设计：处理分配过程是研究者了解最多的环节（制度、规则），把建模火力集中在那里，是信息优势的正确用法。
+  </div>
+</div>
+
+<p><span class="step-label conclusion">小结</span>
+倾向评分定理：CIA成立时给定 $p(X_i)$ 独立照样成立——降维无损；两步估计（logit/probit+匹配或加权）；逆概率加权（3.3.11/3.3.12，Horvitz-Thompson）与回归（3.3.13）同属Hirano-Imbens-Ridder加权族（3.3.14），差别只在权重函数；Hahn悖论（协变量匹配渐进更有效）的三层解答——信息优势、有限样本、非参数评分。</p>
+
+<div class="skeleton-box">
+  <h4>★ Skeleton</h4>
+  <div class="sk-item"><span class="sk-label">起点：</span><span class="sk-content">高维连续协变量下按x分组匹配不可行，需要无损降维。</span></div>
+  <div class="sk-item"><span class="sk-label">工具：</span><span class="sk-content">迭代期望律（四行证明）+ 逆概率加权（Horvitz-Thompson 1952）。</span></div>
+  <div class="sk-item"><span class="sk-label">转折：</span><span class="sk-content">从"降维定理"转到"回归=加权族一员"——倾向评分不是新工具，而是同一件事的另一种权重选择。</span></div>
+  <div class="sk-item"><span class="sk-label">内部次序：</span><span class="sk-content">定理+证明 → 两步估计 → IPW公式 → 加权族统一 → Hahn悖论三层解答。</span></div>
+  <div class="sk-item"><span class="sk-label">终点：</span><span class="sk-content">降维无损；回归/匹配/PSM同属一个加权估计族；不降维就用全协变量匹配或饱和回归。</span></div>
+  <div class="fragile"><span class="fragile-label">⚠️ 易断点：</span>定理3.3.1的证明里 $\mathbb{E}[D \mid Y_{ji}, X_i] = \mathbb{E}[D \mid X_i]$ 这一步用的是什么？——不是CIA本身（CIA说的是潜在结果与处理独立），而是"CIA蕴含处理条件于潜在结果与 $X_i$ 时，处理的条件期望不再依赖潜在结果"。条件独立比"不相关"强，强在条件期望层面的可交换。</div>
+</div>
+
+<p><span class="step-label significance">→</span>
+理论上统一了，但你明天要做实证，先跑哪个？倾向评分操作细节多、无统一标准——"即使运用相同的数据和协变量，不同的研究者也可能得到相当不同的结果"（PDF第73页）。需要证据支撑的实践立场，§3.3.3给出。</p>
+
+<!-- §3.3.3 -->
+<h3 id="s33-2-1-3">§3.3.3 回归vs倾向评分：NSW与Lalonde <a href="#toc" class="back-to-toc">↑Contents</a></h3>
+
+<p><span class="step-label q">Q</span>
+既然理论上一族，实践中该以谁为默认起点？</p>
+
+<p><span class="step-label why">Why</span>
+你要的不是"它们等价"的漂亮结论，而是明天做实证时先跑什么的答案。而且倾向评分法"有太多细节需要考虑，比如如何模型化评分，如何进行推断，这些细节目前还没有形成一套标准"（PDF第73页）。这场争论需要一个有实验基准的裁判。</p>
+
+<div class="what-block">
+  <p><span class="step-label what">What</span></p>
+
+  <div class="wb-item operation">
+    <div class="wb-label">Operation</div>
+    这一小节回答：实践中以谁为默认起点？答案一句话：回归是默认工具，倾向评分担任修剪与验证的辅助。证据来自计量史上最著名的"打脸实验"——NSW项目与Lalonde（1986）。讲清楚需要四个子问题：非实验方法到底多不可靠、悲观结论被推翻了吗、选对照组能系统化吗、作者的实践立场是什么。
+  </div>
+
+  <div class="wb-item argument">
+    <div class="wb-label">论证过程</div>
+
+    <div class="arg-qa">
+      <p class="arg-q">非实验方法到底有多不可靠？</p>
+      <p>Lalonde（1986）给出了著名答案（PDF第73页）。NSW（National Supported Work）是20世纪70年代中期实施的项目，为劳动能力缺乏者提供工作经验，其评估使用了随机实验。Lalonde拿随机实验基准对照非实验方法：用PSID和CPS构造的非随机对照组，估计值之间差别巨大、且与实验基准相去甚远——结论悲观，而且"不知道随机实验结果的客观研究者可能无法选择最好的计量方法，也不知道如何选择基于观察得到的控制组"。这奠定了此后二十年的方法论焦虑。</p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">这个悲观结论后来被推翻了吗？</p>
+      <p>部分被推翻——Dehejia和Wahba（1999）用倾向评分筛选可观察对照组后，匹配估计显著接近随机实验的结果（PDF第73-75页）。表3.4给出全景：被解释变量是1978年年收入（培训后一两年）。实验基准约1600-1800美元，且各种设定下变化不大。CPS-1（全量对照样本）的朴素比较是-8498美元——严重选择偏误：表3.3显示CPS-1平均年龄33.23岁对NSW处理组的25.82岁、1975年收入13651美元对1532美元，根本不是同类人。逐步加入人口特征、滞后收入后收窄到+794；更精细的CPS-3对照组（按NSW选择规则构造）朴素差只有-635，加全控制变量后+1369——与实验基准相差无几。</p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">选对照组能系统化吗？</p>
+      <p>能——Crump、Hotz、Imbens和Mitnik（2009）给出系统规则（PDF第74-75页）：先估计倾向评分，只保留 $0.1 \lt p(X_i) \lt 0.9$ 的观测——"只有那些被处理概率在10%-90%的观察值才会进入回归"，保证每个协变量组既有处理又有控制（共同支撑）。修剪后CPS-1与CPS-3的协变量均值与NSW样本"已经十分接近"（表3.3最后两列），估计值（表3.4第4、5列：1362、649）与实验基准更接近。注意作者的诚实附注："没有对倾向评分法下得到的标准误进行调整，以反映我们在估计得分时的取样方差。"</p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">那实践立场是什么？</p>
+      <p>回归是默认起点（PDF第72-73页）："我们仍然认为回归应该成为大部分经验研究项目的起点。毫无疑问，这个观点无法成为一个定理，因为在很多情况下，用倾向评分进行匹配为我们提供了一个更加可靠的对平均处理效果的估计。我们没有热情拥抱倾向评分法的第一个原因是基于对实际操作的考虑"——建模与推断无标准、结果因研究者而异；且回归协变量足够灵活时（接近饱和），回归本身就可看作倾向评分加权。"如果你使用的回归模型远未饱和，但是如果使用的协变量恰当，那么问题就不是很大。"倾向评分模型的真正价值在于把注意力从难建模的 $\mathbb{E}[Y \mid X, D]$ 转移到易建模的处理分配过程——Ashenfelter（1978）发现政府培训项目参与者收入显著偏低，Dehejia和Wahba证明按评分控制优于按收入历史控制。</p>
+    </div>
+  </div>
+
+  <div class="wb-item points">
+    <div class="wb-label">Points</div>
+    NSW的故事给出一条可操作的分工：回归承担主识别（协变量恰当即可），倾向评分承担两件辅助工作——修剪共同支撑（Crump规则）和稳健性验证（Dehejia-Wahba式对比）。Lalonde的教训则永远成立：没有实验基准时，多策略收敛才是证据强度。
+  </div>
+</div>
+
+<p><span class="step-label conclusion">小结</span>
+Lalonde（1986）：非实验方法与实验基准相去甚远（CPS-1朴素差-8498对实验1600-1800），且不知该信谁；Dehejia-Wahba（1999）：倾向评分筛选后接近实验基准（CPS-3加全控制+1369）；Crump等（2009）：0.1-0.9修剪系统化保证共同支撑，修剪后估计更接近基准；作者立场：回归是默认起点（操作无标准是PSM的软肋），倾向评分是修剪与验证的助手。</p>
+
+<div class="skeleton-box">
+  <h4>★ Skeleton</h4>
+  <div class="sk-item"><span class="sk-label">起点：</span><span class="sk-content">理论等价已证（§3.3.2），实践选择悬而未决。</span></div>
+  <div class="sk-item"><span class="sk-label">工具：</span><span class="sk-content">NSW随机实验作为裁判基准（Lalonde 1986的"打脸"传统）+ 倾向评分修剪（Crump等2009）。</span></div>
+  <div class="sk-item"><span class="sk-label">转折：</span><span class="sk-content">从"非实验方法惨败"转到"倾向评分筛选修复"——同一批数据，筛选规则决定生死。</span></div>
+  <div class="sk-item"><span class="sk-label">内部次序：</span><span class="sk-content">Lalonde悲观结论 → Dehejia-Wahba修复 → Crump系统修剪 → 作者立场（回归为起点）。</span></div>
+  <div class="sk-item"><span class="sk-label">终点：</span><span class="sk-content">回归是默认工具，倾向评分担任修剪与验证的辅助角色。</span></div>
+  <div class="fragile"><span class="fragile-label">⚠️ 易断点：</span>CPS-1的朴素差-8498美元为什么是"选择偏误"而不是"培训的坏效果"？——因为表3.3显示CPS-1与NSW处理组在年龄、教育、婚前收入上全面不可比，比较对象根本不是同一群人。看懂这一点，才理解为什么"用更好的对照组"本身就是一种识别策略。</div>
+</div>
+
+<p><span class="step-label significance">→</span>
+本节闭环：异质性下回归系数=方差加权平均、降维无损（倾向评分）、实践分工落定（回归为主、PSM为辅）。理论到齐了，剩下一层是操作细节——权重、受限因变量、命名史，§3.4收尾。</p>
+
+<!-- §3 完整逻辑链 -->
+<h2 id="s33-3">§3 · The Thread <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<p>本节的全部论证是一条"翻译、降维、落位"的链。从§3.2留下的线性常数效应世界出发，先回答"异质性下回归估计什么"——用解构回归公式证明 $\delta_R$ 是对各组效应 $\delta_x$ 以"处理条件方差"为权的加权平均，再用Angrist（1998）老兵数据的表3.2展示这个权重差异如何在实践中造成匹配与回归的显著分歧；接着解决"协变量太多怎么匹配"——倾向评分定理把高维控制压缩成一个标量且不损失CIA，逆概率加权（Horvitz-Thompson）则揭示回归、匹配、PSM同属Hirano-Imbens-Ridder加权族，差别只在权重函数；最后用NSW实验与Lalonde（1986）的历史教训回答"实践中用哪个"——非实验方法曾因选择偏误惨败，倾向评分筛选让估计回归实验基准，但操作细节无标准，所以回归仍是默认起点、倾向评分担任修剪与验证的辅助角色。本节兑现了§3.1.4预告的"主效应系数是各组效应的加权平均"（PDF第48页），也为§3.4的实施细节铺好了路。</p>
+
+<!-- §3.5 本节小结 -->
+<h2 id="s33-3-5">§3.5 · 本节小结 <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<div class="chapter-summary">
+  <h3>一句话总览</h3>
+  <p><strong>异质性不摧毁回归的因果身份，只改变它的解读方式：回归系数是各协变量组效应的加权平均，权数是处理的条件方差；回归、匹配、倾向评分同属一个加权估计族，差别只在权重——所以回归是合法的因果工具，倾向评分是修剪样本的辅助手段。</strong></p>
+
+  <h3>三个子问题的答案回顾</h3>
+  <p><strong>效应异质时回归估计什么？</strong>$\delta_R = \mathbb{E}[\sigma_D^2(X)\delta_X]/\mathbb{E}[\sigma_D^2(X)]$（3.3.7）——条件方差加权的平均效应；匹配按处理概率加权；老兵数据（表3.2）中两者分歧统计显著；共同支撑组权重为零；连续处理时系数是导数的加权平均（Yitzhaki）。</p>
+  <p><strong>协变量太多怎么降维？</strong>倾向评分定理（3.3.1）：CIA成立时控制 $p(X_i)$ 一个标量就够；两步估计+逆概率加权（3.3.11/3.3.12）；回归（3.3.13）与HT估计同属Hirano-Imbens-Ridder加权族（3.3.14）。</p>
+  <p><strong>实践中用哪个？</strong>Lalonde（1986）教训：非实验方法与实验基准相去甚远（-8498对1600-1800）；Dehejia-Wahba修复；Crump修剪（0.1-0.9）系统化共同支撑；作者立场：回归为默认起点，PSM做修剪与验证。</p>
+
+  <h3>最该带走的三点</h3>
+  <p>① 报告系数时说清它是哪个加权对象——"方差加权的平均政策效应"不是套话，是你的估计的真实定义；② 处理组与对照组协变量不交叠时，DID在向外推——先报告平衡性表，必要时倾向评分修剪（Crump规则）做稳健性；③ 多策略收敛是证据强度：基准回归、匹配、修剪后回归结果方向一致且量级接近，才构成可信的效应区间。</p>
+</div>
+
+<!-- §4 Implications -->
+<h2 id="s33-4">§4 · Implications <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<div class="implications">
+  <div class="pair">
+    <div class="book-says">回归系数是各协变量组处理效应的加权平均，权重是处理的条件方差 $P(1-P)$，在 $P=1/2$ 处最大；匹配的权重则是处理概率（式3.3.7，PDF第64-65页）。</div>
+    <div class="for-you">你的treat_post系数不是各组企业政策效应的等权平均，而是按"各组政策暴露概率"加权——暴露概率接近50%的组权重最大。当政策效应异质时（301调查冲击大的行业/地区 vs 小的），系数是对这个特定加权对象的估计，写作时应表述为"加权平均政策效应"。你的异质性分析（05_heterogeneity）本质上就是在拆解这个加权平均。</div>
+  </div>
+  <div class="pair">
+    <div class="book-says">回归与匹配对"无交叠组"的权重都为零（共同支撑）；Crump等（2009）用 $0.1 \lt p \lt 0.9$ 修剪样本，修剪后估计显著接近实验基准（PDF第65-66、74-75页）。</div>
+    <div class="for-you">你的DID也有隐含的共同支撑问题——如果处理组（对美出口密集企业）与对照组在规模、行业上完全没有交叠，DID就是在外推。借鉴本书做法：先报告处理组与对照组的协变量平衡性表（对应你的描述性统计），若严重不平衡，可用倾向评分修剪样本重跑DID作为稳健性检验。</div>
+  </div>
+  <div class="pair">
+    <div class="book-says">Hahn（1998）——即使某协变量与处理无关、不消除偏误，只要它能解释结果，纳入就能提高精度（例：出生年份与服役无关但与收入有关，PDF第71页）。</div>
+    <div class="for-you">你的控制变量选择不必只盯着"与treat_post相关"的变量；只要与OFDI决策相关（如行业景气、地区开放度），即使与301处理相关性弱，加进回归也能缩小标准误——这是你模型2加控制变量后精度变化的解释之一。</div>
+  </div>
+  <div class="pair">
+    <div class="book-says">作者的立场——回归应是大部分经验研究项目的起点；倾向评分在操作层面细节太多、无统一标准（PDF第72-73页）。</div>
+    <div class="for-you">你的主识别策略以reghdfe基准回归为骨架完全符合本书立场；倾向评分匹配适合作为稳健性检验之一（如PSM-DID）写进03_robustness，而不必成为论文主体方法。</div>
+  </div>
+  <div class="pair">
+    <div class="book-says">Lalonde（1986）的教训——不知道实验基准时，非实验方法之间差别巨大且无法判定孰是孰非（PDF第73页）。</div>
+    <div class="for-you">你永远无法知道301调查对OFDI的"真实效应"，所以证据强度来自多策略收敛：基准DID、事件研究、PSM-DID、安慰剂检验的结果若方向一致且量级接近，效应区间就可信；若各方法结果发散，应如实报告并讨论分歧来源。</div>
+  </div>
+</div>
+
+<!-- §5 Takeaway -->
+<h2 id="s33-5">§5 · Takeaway <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<div class="takeaway">
+  异质性世界里回归系数依然有明确的因果身份——它是各协变量组效应的加权平均，权数是处理的条件方差；回归、匹配、倾向评分同属一个加权估计族，差别只在权重，所以回归是合法的因果工具、倾向评分是修剪样本的辅助手段。
+</div>
+
+<!-- §6 Next -->
+<h2 id="s33-6">§6 · Next <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<ul class="todo-list">
+  <li class="pri-1">$\delta_R$ = 条件方差加权平均（3.3.7）——解释你treat_post系数的正确语言</li>
+  <li class="pri-1">回归与匹配的权重差异及表3.2的演示</li>
+  <li class="pri-1">共同支撑与倾向评分修剪思想（Crump规则）——可直接用于你的稳健性检验</li>
+  <li class="pri-1">"加权估计族"的统一视角（3.3.14）</li>
+  <li class="pri-2">Yitzhaki平均导数公式与正态特例（3.3.8-3.3.10）——连续处理时才需要</li>
+  <li class="pri-2">倾向评分定理的证明细节——见Appendix A.2</li>
+  <li class="pri-2">Hahn悖论的理论争论（Hirano等2003）——用到PSM时再深读</li>
+</ul>
+
+<!-- Appendix A -->
+<h2 id="s33-appendix-a">Appendix A · 公式详细推导 <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<h3 id="s33-appendix-A1">A.1 δ_R=方差加权平均的推导（式3.3.5-3.3.7） <a href="#s33-2-1-1" class="app-back">↩正文</a></h3>
+<div class="derivation-step">
+  <strong>起点：</strong>饱和回归 $Y_i = \sum d_{ix}\alpha_x + \delta_R D_i + e_i$（式3.3.4，关于 $X_i$ 饱和、无 $D \times X$ 交互项）。
+</div>
+<div class="derivation-step">
+  <strong>第1步：</strong>解构回归公式：$\delta_R = \mathrm{cov}(Y, \tilde{D})/V(\tilde{D})$，其中 $\tilde{D} = D_i - \mathbb{E}[D_i \mid X_i]$（饱和模型保证 $\mathbb{E}[D \mid X]$ 线性，故 $\tilde{D}$ 正是 $D$ 对其他回归元回归的残差）：
+  $$\delta_R = \frac{\mathbb{E}[(D_i - \mathbb{E}[D_i \mid X_i])Y_i]}{\mathbb{E}[(D_i - \mathbb{E}[D_i \mid X_i])^2]} \tag{3.3.5/3.3.6}$$
+</div>
+<div class="derivation-step">
+  <strong>第2步：</strong>关键代换——对 $Y_i$ 关于 $X_i$ 与 $D_i$ 回归等价于对 $Y_i$ 关于 $\mathbb{E}[Y \mid D, X]$ 回归（定理3.1.6）。展开 $\mathbb{E}[Y \mid D, X] = \mathbb{E}[Y \mid D=0, X] + \delta_X D_i$（$\delta_X \equiv \mathbb{E}[Y \mid X, D=1] - \mathbb{E}[Y \mid X, D=0]$），代入分子；$\mathbb{E}[Y \mid D=0, X]$ 是 $X$ 的函数，与 $\tilde{D}$ 正交（分解性质）→ 该项消失；第二项中 $\tilde{D}\cdot D = \tilde{D}^2$。
+</div>
+<div class="derivation-step">
+  <strong>第3步：</strong>对 $X_i$ 取迭代期望，令 $\sigma_D^2(X) \equiv \mathbb{E}[(D-\mathbb{E}[D \mid X])^2 \mid X]$：
+  $$\delta_R = \frac{\mathbb{E}[\sigma_D^2(X_i)\delta_X]}{\mathbb{E}[\sigma_D^2(X_i)]} \tag{3.3.7}$$
+  二值 $D$ 下 $\sigma_D^2(x) = P(D=1 \mid x)(1-P(D=1 \mid x))$。回归按条件方差加权，匹配按处理概率加权——只在 $D$ 与 $X$ 无关时重合。
+</div>
+
+<h3 id="s33-appendix-A2">A.2 倾向评分定理证明与IPW（定理3.3.1/式3.3.11） <a href="#s33-2-1-2" class="app-back">↩正文</a></h3>
+<div class="derivation-step">
+  <strong>起点：</strong>$p(X_i) = \mathbb{E}[D_i \mid X_i]$。要证：CIA ⇒ $\{Y_{0i}, Y_{1i}\} \perp\!\!\!\perp D_i \mid p(X_i)$，只需证 $\mathbb{P}[D=1 \mid Y_{ji}, p(X)]$ 不依赖 $Y_{ji}$。
+</div>
+<div class="derivation-step">
+  <strong>第1步：</strong>迭代期望律逐层展开：
+  $$\mathbb{P}[D_i=1 \mid Y_{ji}, p(X_i)] = \mathbb{E}\{\mathbb{E}[D_i \mid Y_{ji}, p(X_i), X_i] \mid Y_{ji}, p(X_i)\} = \mathbb{E}\{\mathbb{E}[D_i \mid Y_{ji}, X_i] \mid Y_{ji}, p(X_i)\}$$
+</div>
+<div class="derivation-step">
+  <strong>第2步：</strong>CIA ⇒ $\mathbb{E}[D \mid Y_{ji}, X_i] = \mathbb{E}[D \mid X_i] = p(X_i)$；再取外层期望：$\mathbb{E}\{p(X_i) \mid Y_{ji}, p(X_i)\} = p(X_i)$——与 $Y_{ji}$ 无关，证毕。
+</div>
+<div class="derivation-step">
+  <strong>第3步（IPW）：</strong>CIA下 $\mathbb{E}[Y_{1i}] = \mathbb{E}[Y_i D_i / p(X_i)]$（对 $X$ 迭代期望：条件期望 $= \mathbb{E}[Y \mid D=1, X]\cdot p(X)/p(X) = \mathbb{E}[Y_{1i} \mid X]$）、$\mathbb{E}[Y_{0i}] = \mathbb{E}[Y_i(1-D_i)/(1-p(X_i))]$。相减合并：
+  $$\mathbb{E}[Y_{1i}-Y_{0i}] = \mathbb{E}\left[\frac{(D_i-p(X_i))Y_i}{p(X_i)(1-p(X_i))}\right] \tag{3.3.11}$$
+</div>
+
+<!-- Appendix B -->
+<h2 id="s33-appendix-b">Appendix B · 补充材料与延伸阅读 <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<h3>B.1 表3.2数据（Angrist 1998：志愿服役与收入）</h3>
+<table>
+  <tr><th>种族</th><th>平均收入(1988-91)</th><th>朴素差距</th><th>匹配估计</th><th>回归估计</th><th>回归-匹配</th></tr>
+  <tr><td>白人</td><td>14537</td><td>1233.4 (60.3)</td><td>-197.2 (70.5)</td><td>-88.8 (62.5)</td><td>108.4 (28.5)</td></tr>
+  <tr><td>非白人</td><td>11664</td><td>2449.1 (47.4)</td><td>839.7 (62.7)</td><td>1074.4 (50.7)</td><td>234.7 (32.5)</td></tr>
+</table>
+<p>样本：1979-1982年申请入伍的男性（白人128968、非白人175262），收入为1988-1991年社保账户纳税收入；控制出生年份、申请时教育水平、AFQT考分。匹配与回归的差异在统计上显著——权重结构不同。</p>
+
+<h3>B.2 引用文献速查</h3>
+<table>
+  <tr><th>引用</th><th>页码</th><th>本节中的作用</th></tr>
+  <tr><td>Angrist (1998)</td><td>p061-063</td><td>匹配与回归分歧的实证（表3.2）；出生年份协变量例子</td></tr>
+  <tr><td>Yitzhaki (1996)</td><td>p067</td><td>连续处理：回归系数=平均导数的加权平均</td></tr>
+  <tr><td>Rosenbaum &amp; Rubin (1983, 1985)</td><td>p068, 071</td><td>倾向评分定理；处理分配模型的信息优势</td></tr>
+  <tr><td>Horvitz &amp; Thompson (1952)</td><td>p070</td><td>按被选概率加权调整非随机抽样的思想源头</td></tr>
+  <tr><td>Newey (1990); Robins, Mark &amp; Newey (1992)</td><td>p070</td><td>IPW估计量（3.3.11）</td></tr>
+  <tr><td>Imbens (2004)</td><td>p069</td><td>两步估计方法综述</td></tr>
+  <tr><td>Hahn (1998)</td><td>p071</td><td>倾向评分匹配渐进低效（悖论）</td></tr>
+  <tr><td>Angrist &amp; Hahn (2004)</td><td>p071</td><td>有限样本下倾向评分的精度收益</td></tr>
+  <tr><td>Hirano, Imbens &amp; Ridder (2003)</td><td>p070-072</td><td>加权估计族（3.3.14）；非参数评分恢复有效性</td></tr>
+  <tr><td>Lalonde (1986)</td><td>p073</td><td>非实验方法与实验基准的著名对照</td></tr>
+  <tr><td>Dehejia &amp; Wahba (1999)</td><td>p073-075</td><td>倾向评分修复Lalonde；表3.3/3.4来源</td></tr>
+  <tr><td>Crump, Hotz, Imbens &amp; Mitnik (2009)</td><td>p074-075</td><td>0.1-0.9修剪规则</td></tr>
+  <tr><td>Ashenfelter (1978)</td><td>p072</td><td>培训参与者收入偏低（选择进培训的预处理效应）</td></tr>
+  <tr><td>Angrist &amp; Kuersteiner (2004)</td><td>p071</td><td>处理分配过程的信息优势（美联储利率例子）</td></tr>
+</table>
+
+<h3>B.3 Stata实操对应</h3>
+<pre><code>* 倾向评分修剪（Crump规则：0.1 &lt; p &lt; 0.9，保证共同支撑）
+logit treat x1 x2 x3
+predict p_hat, pr
+keep if p_hat &gt; 0.1 &amp; p_hat &lt; 0.9
+regress y treat x1 x2 x3, robust   // 修剪后重跑主回归
+
+* 平衡性检验（共同支撑的可视化诊断）
+summarize x1 x2 if treat==1
+summarize x1 x2 if treat==0
+</code></pre>
+
+<h3>B.4 本节在全章中的位置</h3>
+<div class="problem-tree">
+  <div class="root-q">§3.3把因果解读从"常数效应"推广到"加权平均效应"。</div>
+  <ul class="tree-list">
+    <li>§3.1：回归的统计学身份——CEF近似 + 渐进推断</li>
+    <li>§3.2：因果条件——CIA、OVB公式、坏控制</li>
+    <li>§3.3（本节）：异质性——回归=方差加权的匹配估计量、倾向评分</li>
+    <li>§3.4：操作细节——加权回归、有限被解释变量、命名史</li>
+  </ul>
+</div>
+
+<!-- §0 前置定位 -->
+<h2 id="s34-0">§0 · Prelude <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<p>前三节完成了理论大厦：§3.1给回归统计学身份（CEF的近似），§3.2给因果条件（CIA），§3.3把因果解读推广到异质性（加权平均）。但理论落地到日常操作时会撞上三个反复纠缠应用研究者的"细节"：样本不是随机抽样要不要加权？被解释变量是0-1或非负时要不要换probit/Tobit？"回归"这个词到底从哪来、本义是什么？本节逐一处理这三件事，最后以回归的命名史收束全章。</p>
+
+<!-- §1 总问题树 -->
+<h2 id="s34-1">§1 · The Question <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<div class="problem-tree">
+  <div class="root-q">本节总问题：当回归从理论走向日常操作，三个令应用研究者困扰的细节——要不要加权回归、有限被解释变量要不要换非线性模型、回归为什么叫"回归"——分别该怎么回答？</div>
+  <ul class="tree-list">
+    <li><a href="#s34-2-1-1">§3.4.1</a> 要不要加权：把估计对准总体时才加权
+      <ul class="tree-sublist"><li>抽样权重与分组还原是正当用途；为效率加权不值得</li></ul>
+    </li>
+    <li><a href="#s34-2-1-2">§3.4.2</a> 有限被解释变量：OLS合法，非线性模型只是曲线拟合
+      <ul class="tree-sublist"><li>HIE证明OLS=ATE与Y类型无关；边际效应≈OLS（表3.6）；COP是坏控制翻版</li></ul>
+    </li>
+    <li><a href="#s34-2-1-3">§3.4.3</a> 回归为什么叫"回归"：命名史与解释纪律
+      <ul class="tree-sublist"><li>Galton的向均值回归是描述性的；因果用法始于Yule（1899）</li></ul>
+    </li>
+  </ul>
+</div>
+
+<!-- §3.4.1 -->
+<h3 id="s34-2-1-1">§3.4.1 加权回归：把估计对准总体 <a href="#toc" class="back-to-toc">↑Contents</a></h3>
+
+<p><span class="step-label q">Q</span>
+样本不是简单随机抽样、或手里只有分组数据时，要不要加权回归？</p>
+
+<p><span class="step-label why">Why</span>
+"对于应用研究者而言，没有什么比确定样本权重更加令人困扰了。即使到现在，距我们拿到博士学位已有20年，我们还是对Stata手册中关于加权回归的相应章节感到不甚满意"（PDF第76页）。而且"如何使用权重确实在很大程度上会影响你的结果"——不拿到一条可执行的判据，每个回归表前都要纠结一次。</p>
+
+<div class="what-block">
+  <p><span class="step-label what">What</span></p>
+
+  <div class="wb-item operation">
+    <div class="wb-label">Operation</div>
+    这一小节回答：要不要加权？答案一句话：加权只在"把估计对准总体"时正当（抽样权重、分组还原），为效率而加权不值得。讲清楚需要四个子问题：什么时候加权正当、分组数据怎么办、异方差WLS该信吗、异方差到底怎么办。
+  </div>
+
+  <div class="wb-item argument">
+    <div class="wb-label">论证过程</div>
+
+    <div class="arg-qa">
+      <p class="arg-q">什么时候加权是正当的？</p>
+      <p>当加权使你的估计更接近总体目标时。正当用途一（PDF第76页）：你的估计目标是总体回归向量、样本却是非随机抽样的，就用观测值被抽中概率的倒数 $w_i$ 做权重（Stata里pweights、SAS里weight命令），"可以为我们带来对总体回归方程的一致估计，即使你手头所使用的样本不是简单随机抽样得到的"。判据一句话："当加权可使你估计的数值更加接近总体的相应值时，你就应该使用加权回归。"</p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">手里只有分组数据，怎么办？</p>
+      <p>用组规模加权，可以精确还原微观回归（PDF第77页）。只有每组均值 $\bar{y}_x$ 和组规模 $n_x$ 时，用 $n_x$ 做权重对 $\bar{y}_x$ 关于x做加权回归，得到的估计值与直接对随机抽样的微观数据回归完全相同——这是§3.1.2图3.3结论的直接应用。作者顺带吐槽："习惯于针对已发布数据（比如人均GDP）进行分析的宏观经济学家往往会忽略相应的微观数据……这种研究方法更喜欢对加总数据进行无加权处理"（两种思路的详细讨论见Pfeffermann 1993和Deaton 1997）。</p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">教科书说异方差时WLS更有效，该信吗？</p>
+      <p>不该急着信（PDF第77-78页）。教科书把加权理由归结为异方差：线性CEF下WLS（权重取条件方差的倒数）比OLS更有效，LPM的GLS权重就是 $[X_i'\beta(1-X_i'\beta)]^{-1}$。但有两个反对理由：其一，条件方差函数是估计出来的，估计很差或充满噪音时"加权最小二乘估计值的有限样本性质可能比未加权的情况还差"——为了提高效率而加权，可能连效率都保不住；其二，CEF非线性时WLS同样无能为力。更重要的是解释性：不加权的OLS"在最小均方误的意义下为我们提供了对总体CEF的最好估计"，且便于与其他研究比较；加权则"为如何设定权重打开了相互之间进行争议的空间"。</p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">那异方差到底怎么办？</p>
+      <p>"如果东西还没坏，就别急着去修（if it ain't broke, don't fix it）"（PDF第78页）。异方差不影响总体回归向量的解释，效率改进有限、错误权重弊大于利——异方差问题交给§3.1.3的稳健标准误解决即可。这条纪律和§3.1.3连起来读：稳健标准误负责"推断可靠"，无加权OLS负责"解释干净"。</p>
+    </div>
+  </div>
+
+  <div class="wb-item points">
+    <div class="wb-label">Points</div>
+    加权的判据只有一个：它是否让你的估计更接近总体目标？抽样权重（pweights）和分组还原（组规模加权）回答"是"，效率加权回答"不划算"。别为了效率加权——那是在用估计出来的权重换掉你唯一干净的基准（无加权OLS的CEF身份）。
+  </div>
+</div>
+
+<p><span class="step-label conclusion">小结</span>
+加权回归的正当用途是把估计对准总体：非随机抽样用抽样概率倒数（pweights）、分组数据用组规模（精确还原微观回归）；为异方差效率而加权不值得——权重估计有噪音、CEF非线性时无效、解释性与可比性受损；纪律："如果东西还没坏，就别急着去修"，异方差交给稳健标准误。</p>
+
+<div class="skeleton-box">
+  <h4>★ Skeleton</h4>
+  <div class="sk-item"><span class="sk-label">起点：</span><span class="sk-content">样本与总体的关系不完美（非随机抽样/分组数据），教科书又建议为效率加权。</span></div>
+  <div class="sk-item"><span class="sk-label">工具：</span><span class="sk-content">pweights的抽样权重建模 + §3.1.2的分组WLS等价性 + 有限样本性质分析。</span></div>
+  <div class="sk-item"><span class="sk-label">转折：</span><span class="sk-content">从"加权提高效率"转到"加权可能更差"——估计出的权重引入新的噪音源。</span></div>
+  <div class="sk-item"><span class="sk-label">内部次序：</span><span class="sk-content">正当用途一（抽样权重）→ 正当用途二（分组数据）→ 驳效率加权 → "没坏别修"纪律。</span></div>
+  <div class="sk-item"><span class="sk-label">终点：</span><span class="sk-content">加权只用于对准总体；效率问题用稳健标准误，不用WLS。</span></div>
+  <div class="fragile"><span class="fragile-label">⚠️ 易断点：</span>为什么"分组数据用 $n_x$ 加权=微观回归"成立，而"异方差下WLS更有效"却不被推荐？——因为前者用的是真实已知的组规模（无估计误差），后者用的是估计出的条件方差（有估计误差）。权重是否被估计，是两条路的分水岭。</div>
+</div>
+
+<p><span class="step-label significance">→</span>
+加权的结论根基是回归的CEF身份。下一个更尖锐的挑战：如果Y本身都不是连续的（0-1、非负），这个身份还撑得住吗？教科书说要用probit/Tobit——真的吗？§3.4.2检验。</p>
+
+<!-- §3.4.2 -->
+<h3 id="s34-2-1-2">§3.4.2 有限被解释变量与边际效应 <a href="#toc" class="back-to-toc">↑Contents</a></h3>
+
+<p><span class="step-label q">Q</span>
+被解释变量取值有限（0-1、非负）时，线性回归还合法吗？要不要换probit/Tobit？</p>
+
+<p><span class="step-label why">Why</span>
+很多计量教科书宣称OLS适合连续被解释变量、有限被解释变量（LDV）应改用probit和Tobit等非线性模型。如果这个说法成立，应用研究里一大半回归（就业、参与、投资决策）都要换工具。本书立场鲜明："我们认为有限被解释变量带来的问题并不严重，因为回归的合法性来自于它和CEF之间的紧密关系"（PDF第78页）——但这个立场需要证据，而且probit/Tobit的系数不可直接读、正数效应暗藏偏误，都需要拆穿。</p>
+
+<div class="what-block">
+  <p><span class="step-label what">What</span></p>
+
+  <div class="wb-item operation">
+    <div class="wb-label">Operation</div>
+    这一小节回答：LDV要不要换模型？答案一句话：不需要——随机化下OLS斜率就是ATE、与Y的类型无关，非线性模型只是曲线拟合工具、其边际效应与OLS几乎相同。证据是兰德健康保险实验（随机化基准）与表3.6（边际效应对照）。讲清楚需要四个子问题：Y受限时OLS还是因果效应吗、probit/Tobit系数能直接读吗、COP分解精细分析安全吗、非线性模型到底有什么用。
+  </div>
+
+  <div class="wb-item argument">
+    <div class="wb-label">论证过程</div>
+
+    <div class="arg-qa">
+      <p class="arg-q">Y是0-1或非负时，OLS斜率还是因果效应吗？</p>
+      <p>是，而且这一点有实验背书——兰德健康保险实验（RAND HIE，Manning等1987，PDF第78-79页）。"也许是美国社会科学领域中成本最高的研究"：兰德公司成立了一家不收保费的小型保险公司，近6000名参与者被随机分配不同保险计划——免费计划，或每年自付150美元门诊费（家庭450美元）的计划。目的是了解"人们对医疗的使用是否考虑成本，如果是的话，它对健康有什么影响"；结果发现低成本者确实消费更多医疗服务，但对多数人健康并无改善——这项成果为成本敏感型保险和受管理医疗服务提供了理论基础。表3.5给出两个处理组的平均结果：面对面就诊次数4.55对3.02（差-1.53）、门诊花费340对235美元（-105）、总花费749对608美元（-141）。形式证明在式3.4.1（PDF第79页）：$D_i$ 随机分配时，$\mathbb{E}[Y \mid D=1] - \mathbb{E}[Y \mid D=0] = \mathbb{E}[Y_{1i}] - \mathbb{E}[Y_{0i}]$ = 平均因果效应，"不论 $Y_1$ 是二元变量、非负变量还是连续变量，都没有影响"。Y是0-1变量时（式3.4.2），ATE就是两个概率之差：免费组87%的人至少用过医疗服务、自付组72%，效应-0.15。非负变量同理：自付组少花141美元，约为免费组全年费用的19%。回归合法性从随机化和CEF关系推出，与Y的支撑无关——这一步把LDV恐慌釜底抽薪。</p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">probit/Tobit的系数能直接读吗？</p>
+      <p>不能（PDF第80-83页）。probit的潜变量模型 $Y_i^* = \beta_0^* + \beta_1^*D_i - v_i$（式3.4.3）下，系数 $\beta_1^*$"本身并没有告诉我们 $D_i$ 的因果效应的大小，只有将其代入正态累积分布函数才能将因果效应大小看清楚"，而且潜变量"不可能是真实的医疗花费，因为真实的医疗花费不可能为负"——用正态潜变量去套一个非负的量，起点就错了。Tobit的处理效应表达式（式3.4.7）"可是个相当让人畏惧的公式"——而二值回归元下，OLS斜率就等于这个差，与你是否采用Tobit来解释潜在结果的结构无关。</p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">把非负Y分解成"参与效应+正数效应"精细分析，总可以吧？</p>
+      <p>有陷阱（PDF第81-82页）。非负Y的处理组差可以分解成"参与效应+给定为正时的效应（COP）"（式3.4.4），看似精细，但正数效应项含选择偏误（式3.4.5）：随机实验改变了"花费为正"群体的构成——自付150美元把本来只花一点钱的边际使用者挤出了 $Y>0$ 群体。"这是3.2.3节不合格控制变量的另一个版本：除非实验处理对 $Y_i$ 为正的这件事没有影响，否则在一个考虑因果效应的背景下，$Y_i>0$ 是表示结果的变量，不适合作为控制变量。"想看分布效应，正确姿势是直接考察处理对分布的影响——令 $1[Y_i>c]$ 取c=0、100、200美元分别做回归（Angrist 2001分析抚养小孩对工作时间的影响正是此法），或用分位数回归（第7章）。Tobit只在真正删失时有用：CPS为保护隐私截断高收入，Chamberlain（1994）指出这种删失曾显著压低教育回报估计。</p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">那非线性模型到底还有什么用？</p>
+      <p>曲线拟合（PDF第84-87页）。带协变量时LDV的CEF几乎必然非线性（均值接近边界时导数变小），所以probit/Tobit的正当理由是"拟合值落在可行域内"（probit在0-1之间、Tobit为正）；但非线性模型的结果"必须转化为边际效应才能有用"（式3.4.8做差、或平均导数式3.4.9）。而边际效应与OLS几乎相同——表3.6用Angrist和Evans（1998）的样本（1980年美国人口普查、21-35岁至少两个孩子的已婚女性、254654个观测）比较第三胎对就业率的影响：OLS -0.162，probit边际效应-0.163和-0.162；对工作时间：OLS -5.92，Tobit边际效应-6.56/-5.87（"虽然有一个Tobit估计值比最小二乘估计高出了将近10%，但是实质上这并不重要"）。"当被预测的概率接近0.5时probit产生的边际效应接近最小二乘估计值"的说法，在就业率83%的高均值子样本（上过大学、20岁前生第一胎、30岁以上的非白人女性）再次被验证：-0.061对-0.064/-0.070。结论："当我们考虑边际效应时，线性模型和非线性模型下结论的差别会变得很小。这个相当乐观的结论算不上是一个定理，但是……看上去很稳健。"为什么不干脆用非线性模型？因为边际效应虽好算（Stata自动给出），但加权方式、做差还是微分、工具变量、面板、边际效应的标准误全都更麻烦——引用Angus Deaton（1997）对Tobit的吐槽收束："如果我们必须处理这种丑陋的、困难的而且不稳健的模型，我们得到了什么"（另见Powell 1989）。奥卡姆剃刀："如无必要，勿增实体。"</p>
+    </div>
+  </div>
+
+  <div class="wb-item points">
+    <div class="wb-label">Points</div>
+    LDV不是换模型的理由：OLS在随机化（或CIA）下直接给出ATE，概率就是概率、钱就是钱；probit/Tobit只是"拟合值不出界"的曲线拟合工具，其系数必须转成边际效应——而边际效应与OLS几乎相同（-0.162对-0.163）。真正要警惕的不是Y的分布，而是COP这类"以结果为条件"的分解。
+  </div>
+</div>
+
+<p><span class="step-label conclusion">小结</span>
+随机化下OLS斜率=ATE与Y类型无关（3.4.1），HIE演示二元（-0.15）与非负（-141美元，19%）情形；probit系数需代入正态CDF才可读，Tobit的潜变量与正态性假设不可辩护（式3.4.7"令人畏惧"而OLS斜率即同值）；COP分解含选择偏误（3.4.5），是坏控制的翻版；表3.6证明边际效应≈OLS（-0.162对-0.163/-0.162；-5.92对-6.56/-5.87）；Tobit只在真正删失（CPS收入截断）时有用；想看分布效应就用 $1[Y>c]$ 回归或分位数回归。</p>
+
+<div class="skeleton-box">
+  <h4>★ Skeleton</h4>
+  <div class="sk-item"><span class="sk-label">起点：</span><span class="sk-content">教科书宣称LDV应改用probit/Tobit，动摇线性回归的默认地位。</span></div>
+  <div class="sk-item"><span class="sk-label">工具：</span><span class="sk-content">随机化设定下的条件期望恒等式 + 边际效应（做差/平均导数）+ 表3.6对照。</span></div>
+  <div class="sk-item"><span class="sk-label">转折：</span><span class="sk-content">从"非线性模型更正确"转到"非线性模型只是曲线拟合"——正确性属于CEF身份，不属于函数形式。</span></div>
+  <div class="sk-item"><span class="sk-label">内部次序：</span><span class="sk-content">HIE基准（3.4.1/3.4.2）→ 三陷阱（probit系数/COP/Tobit）→ 边际效应对照（表3.6）→ 奥卡姆剃刀收束。</span></div>
+  <div class="sk-item"><span class="sk-label">终点：</span><span class="sk-content">OLS对LDV完全合法；非线性模型系数须转边际效应，且边际效应≈OLS；Tobit留给真删失。</span></div>
+  <div class="fragile"><span class="fragile-label">⚠️ 易断点：</span>为什么"随机实验改变了 $Y>0$ 群体的构成"会让COP带偏误，而OLS的ATE不带？——因为ATE在随机化下比较的是同一批人（潜在结果），COP条件在 $Y>0$ 这个"结果上"才比较，条件事件本身被处理改变。条件在结果上，正是§3.2.3坏控制的精确定义。</div>
+</div>
+
+<p><span class="step-label significance">→</span>
+OLS如此朴素又好用，一个概念问题浮上来：这个工具为什么叫"回归"？它最初描述的是什么？§3.4.3用命名史完成全章的解释纪律。</p>
+
+<!-- §3.4.3 -->
+<h3 id="s34-2-1-3">§3.4.3 回归为什么叫"回归" <a href="#toc" class="back-to-toc">↑Contents</a></h3>
+
+<p><span class="step-label q">Q</span>
+"回归"一词从哪来？它的本义对今天的因果研究提醒什么？</p>
+
+<p><span class="step-label why">Why</span>
+整章都在教给回归赋予因果解释，但这个词的出身恰恰是一个纯描述性的现象。搞不清这个出身，就分不清"机械的统计规律"和"因果解释"的边界——这正是§3.1开头划下的界线（"我们未必能对回归估计量赋予一个因果解释"），全章结束前要用历史把这条线再描一遍。</p>
+
+<div class="what-block">
+  <p><span class="step-label what">What</span></p>
+
+  <div class="wb-item operation">
+    <div class="wb-label">Operation</div>
+    这一小节回答："回归"为什么叫回归？答案分两段历史：Galton的身高研究给出名字和向均值回归现象（描述性、无因果）；Yule的贫困研究完成从描述到因果的转折（多元回归的第一篇论文就是因果研究）。它给全章的解释纪律盖章：描述性规律与因果解释永远是两回事。
+  </div>
+
+  <div class="wb-item argument">
+    <div class="wb-label">论证过程</div>
+
+    <div class="arg-qa">
+      <p class="arg-q">"回归"这个词是怎么来的？</p>
+      <p>来自Galton（1886）的身高研究（PDF第87-88页）。"在他书中第26页描述说当时他正在拜访自己的裁缝，希望研究一下几乎呈正态分布的父母和其子女的身高。"因为身高分布代际不变，$Y_i$（子女身高）与 $x_i$（父母平均身高）均值方差相同，于是二元回归斜率 $\beta_1 = \mathrm{cov}(Y,x)/V(x) = \rho_{xy}$（恰好是代际相关系数）、截距 $\alpha = \mu(1-\rho_{xy})$，条件期望 $\mathbb{E}[Y \mid x] = \mu(1-\rho_{xy}) + \rho_{xy}x$——<strong>子女身高的条件期望是父母身高与总体均值的加权平均</strong>。于是高个子父母的孩子平均比父母矮、矮个子父母的孩子平均比父母高，Galton称之为"遗传的身高向平均水平回归"。作者用自嘲把现象讲活（PDF第88页）："Pischke（本书的一个作者）有六英尺三英寸那么高，他知道自己的孩子应该也会比较高，但可能不会像他那么高。可喜的是，Angrist只有六英尺高，所以他知道自己的孩子可能会比他高。"<span class="app-ref">推导详见 <a href="#s34-appendix-A1">Appendix A.1 ↓</a></span></p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">这个发现是因果结论吗？</p>
+      <p>不是，是纯描述性的机械规律。向均值回归是方差的算术结果：分布代际不变，极端值的下一代期望必然向中心收缩，与任何遗传机制无关——把"高个父母的孩子偏矮"读成因果，就是混淆描述与因果的典型错误。作者还处理了Galton的科学史背景（PDF第88页）："Galton还是达尔文（Charles Darwin）的表兄，并且创立了优生学会（Eugenics Society），他致力于培育更优良的人种。事实上，他对回归的兴趣很大程度上来自于这种诉求。我们因此总结出的道理就是科学观点的价值不应掺杂其发明者的政治观点。"同时Galton拒绝了拉马克"特定特点可以遗传"的想法（后来斯大林在苏联推广了这个观点）——工具的价值与发明者的政治立场无关。</p>
+    </div>
+
+    <div class="arg-qa">
+      <p class="arg-q">那回归什么时候变成因果工具的？</p>
+      <p>Yule（1899）——第一篇多元回归论文就是因果研究（PDF第88-89页）。Yule是Karl Pearson（Galton的门生）的学生，他意识到只要求解一般性的最小方程问题（早已被Legendre和Gauss解决）就能把Galton的回归参数推广到多元。他的论文把英国各地区贫困率的变化与济贫法案的变化相联系，控制了人口增长和该地区人口的年龄分布；他特别关心的是"为穷人提供收入帮助但是不要求他们搬进贫民院可能使得救助本身失去了效力"——"这是一个经过很好定义的因果关系的问题，即使到今天，这类问题仍然是我们考虑的问题"。也就是说：多元回归自诞生起就是因果工具，而"回归"这个名字从诞生起就是描述性的——两者必须分清。统计史细节见Stigler（1986）——芝加哥大学著名统计学家Steven Stigler，"但是相比于他的父亲，经济学家和诺贝尔经济学奖获得者George Stigler，他的名气还是逊了一些"。</p>
+    </div>
+  </div>
+
+  <div class="wb-item points">
+    <div class="wb-label">Points</div>
+    "回归"这个名字自带警示：它诞生于描述性规律（向均值回归），因果用法是后来嫁接的（Yule）。所以每次读回归表时都要问一句：这个系数是机械描述还是因果效应？前者永远成立，后者需要CIA——这正是§3.1与§3.2的分工。
+  </div>
+</div>
+
+<p><span class="step-label conclusion">小结</span>
+Galton（1886）拜访裁缝的身高研究给出"回归"一词：代际身高分布不变使斜率=相关系数，CEF=父母身高与总体均值的加权平均——向均值回归，纯描述、无因果；作者以"科学观点不掺杂发明者政治观点"处理Galton的优生学背景；Yule（1899）写出第一篇多元回归论文（贫困率与济贫法案，控制人口增长与年龄分布）——多元回归自诞生起就是因果工具；两者必须分清。</p>
+
+<div class="skeleton-box">
+  <h4>★ Skeleton</h4>
+  <div class="sk-item"><span class="sk-label">起点：</span><span class="sk-content">整章教因果解释，但工具的名字从描述性现象而来，需要交代。</span></div>
+  <div class="sk-item"><span class="sk-label">工具：</span><span class="sk-content">二元回归斜率/截距公式 + 代际分布不变的等均值等方差条件。</span></div>
+  <div class="sk-item"><span class="sk-label">转折：</span><span class="sk-content">从Galton的机械描述转到Yule的因果研究——同一个工具，两种用法，一百二十年来的分界线。</span></div>
+  <div class="sk-item"><span class="sk-label">内部次序：</span><span class="sk-content">Galton裁缝故事与公式 → 优生学背景与科学史态度 → Yule的因果转折 → Stigler统计史。</span></div>
+  <div class="sk-item"><span class="sk-label">终点：</span><span class="sk-content">"回归"本义是描述性的向均值回归；因果用法是嫁接的；分清两者是全章的解释纪律。</span></div>
+  <div class="fragile"><span class="fragile-label">⚠️ 易断点：</span>向均值回归为什么不构成因果解释？——因为它是方差的算术结果：身高分布代际不变，极端值下一代的期望必然向中心收缩，与任何"遗传机制"无关。把"高个父母的孩子偏矮"读成因果，就是混淆了描述与因果的典型错误。</div>
+</div>
+
+<p><span class="step-label significance">→</span>
+本节闭环，全章闭环。回归的统计身份（CEF近似）、因果条件（CIA）、异质性解读（加权平均）、操作纪律（不加权、不迷信非线性、分清描述与因果）全部就位。四节笔记合成总笔记时，这条线将串起整个第3章。</p>
+
+<!-- §3 完整逻辑链 -->
+<h2 id="s34-3">§3 · The Thread <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<p>本节的全部论证是"从数据、到模型、再到概念"的收尾链。先处理数据与总体的不一致：加权回归的正当用途是把估计对准总体——非随机抽样用抽样概率倒数（pweights）、分组数据用组规模还原微观回归；为异方差效率而加权不划算，权重估计有噪音、解释性与可比性受损，"如果东西还没坏，就别急着去修"，异方差交给§3.1.3的稳健标准误。再处理模型与Y的分布不一致：兰德健康保险实验证明随机化下OLS斜率就是ATE、与Y的类型无关（式3.4.1），probit/Tobit只是拟合值落在可行域的曲线拟合工具，其系数必须转成边际效应——而表3.6证明边际效应与OLS几乎相同（-0.162对-0.163），COP分解是坏控制偏误的翻版（式3.4.5），Tobit留给真正的删失数据。最后退一步问工具本身的出身："回归"来自Galton对身高向均值回归的描述性观察——那是方差的算术结果、与因果无关；因果多元回归始于Yule（1899）的济贫法案研究。回归的合法性从不来自数据抽样方式或Y的分布，而来自它与CEF的关系；而它的名字提醒我们，描述性规律与因果解释永远是两回事。</p>
+
+<!-- §3.5 本节小结 -->
+<h2 id="s34-3-5">§3.5 · 本节小结 <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<div class="chapter-summary">
+  <h3>一句话总览</h3>
+  <p><strong>回归的合法性从不来自Y的分布或数据的抽样方式，而来自它与CEF的关系：所以异方差用稳健标准误而非加权、有限被解释变量用OLS而非非线性模型（边际效应几乎相同）；而"回归"一词的本义"向均值回归"提醒你——描述性的机械规律与因果解释永远是两回事。</strong></p>
+
+  <h3>三个子问题的答案回顾</h3>
+  <p><strong>要不要加权？</strong>只在对准总体时加权：非随机抽样用pweights（抽样概率倒数）、分组数据用组规模（精确还原微观回归）；为效率加权不划算——权重估计有噪音、可比性受损；异方差交给稳健标准误。</p>
+  <p><strong>LDV要不要换模型？</strong>不需要：随机化下OLS斜率=ATE与Y类型无关（HIE：-0.15、-141美元）；probit/Tobit系数须转边际效应、且边际效应≈OLS（表3.6）；COP分解是坏控制翻版；Tobit只在真删失时有用；分布效应用 $1[Y>c]$ 回归或分位数回归。</p>
+  <p><strong>回归为什么叫"回归"？</strong>Galton（1886）身高研究：代际分布不变使斜率=相关系数，子女身高=父母身高与总体均值的加权平均——向均值回归，纯描述无因果；因果多元回归始于Yule（1899）济贫法案研究。</p>
+
+  <h3>最该带走的三点</h3>
+  <p>① 回归表默认稳健（聚类）标准误、别为效率加权——"没坏别修"；② Y是0-1就用LPM，非线性模型的边际效应只作为稳健性对照；③ 任何"向均值回归"式的描述性趋势都不是政策效应——你的DID对照设计就是在剔除它。</p>
+</div>
+
+<!-- §4 Implications -->
+<h2 id="s34-4">§4 · Implications <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<div class="implications">
+  <div class="pair">
+    <div class="book-says">pweights的正当用途——非随机抽样时用抽样概率倒数加权可一致估计总体回归向量；分组数据用组规模加权可精确还原微观回归结果（PDF第76-77页）。</div>
+    <div class="for-you">你的海关出口企业面板基本是（近似）全样本，不需要pweights。但如果将来做城市-年份层面的加总稳健性检验，按"组内观测数"加权才等价于微观回归——不加权得到的是另一个估计对象，报告时要说明。</div>
+  </div>
+  <div class="pair">
+    <div class="book-says">异方差不是加权的理由——权重估计有噪音，WLS有限样本可能更差；稳健标准误已经足够，"如果东西还没坏，就别急着去修"（PDF第77-78页）。</div>
+    <div class="for-you">你的Y是0-1变量、必然异方差，但不需要WLS/GLS——直接用cluster(城市编码)的稳健标准误，与铁律第4条完全一致。若有人建议为效率做加权，本书的答案明确：弊大于利。</div>
+  </div>
+  <div class="pair">
+    <div class="book-says">二值处理下OLS斜率=ATE，与Y是否有限无关（式3.4.1）；probit/Tobit系数必须转化为边际效应，而边际效应与OLS几乎相同（表3.6：-0.162对-0.163/-0.162）（PDF第79、86页）。</div>
+    <div class="for-you">你的treat_post是0-1处理、Y是0-1变量（是否OFDI），LPM完全合法，报告OLS系数即概率效应。若审稿人要求logit/probit，其边际效应应与LPM系数接近——两者一致本身就是稳健性证据。</div>
+  </div>
+  <div class="pair">
+    <div class="book-says">COP"正数效应"分解含选择偏误——处理改变了"Y为正"群体的构成，是坏控制问题的翻版（式3.4.5，PDF第81-82页）。</div>
+    <div class="for-you">若你把样本限定在"已经OFDI的企业"里分析投资规模/次数，就是COP分析——该子样本构成本身受301调查影响，系数带选择偏误。要么明确解释为条件效应并承认局限，要么改用全样本的0-1变量（是否OFDI）加分布效应（1[Y>c]）思路。</div>
+  </div>
+  <div class="pair">
+    <div class="book-says">向均值回归是描述性现象而非因果——Galton的身高回归没有因果解释，因果多元回归始于Yule（1899）研究贫困法案（PDF第87-89页）。</div>
+    <div class="for-you">OFDI水平高的企业政策后可能自然回落——你的DID对照组与事件研究设计正是在剔除这种描述性趋势：平行趋势检验本质上就是证明"政策后处理组的变化不是向均值回归"。可在稳健性部分点出这一点。</div>
+  </div>
+</div>
+
+<!-- §5 Takeaway -->
+<h2 id="s34-5">§5 · Takeaway <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<div class="takeaway">
+  回归的合法性从不来自Y的分布或数据的抽样方式，而来自它与CEF的关系：所以异方差用稳健标准误而非加权、有限被解释变量用OLS而非非线性模型（边际效应几乎相同）；"回归"一词的本义"向均值回归"则提醒你——描述性的机械规律与因果解释永远是两回事。
+</div>
+
+<!-- §6 Next -->
+<h2 id="s34-6">§6 · Next <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<ul class="todo-list">
+  <li class="pri-1">"多数情况不加权"判据及两个正当用途（pweights/分组）——直接约束你的实际操作</li>
+  <li class="pri-1">LPM合法性、边际效应≈OLS（表3.6）、COP的选择偏误——约束你的机制分析</li>
+  <li class="pri-1">向均值回归警示——写入稳健性讨论</li>
+  <li class="pri-2">probit/Tobit的公式细节（3.4.3-3.4.9）——审稿人要求非线性模型时再翻</li>
+  <li class="pri-2">兰德实验表3.5的具体数值——见Appendix B.1</li>
+  <li class="pri-2">Galton/Yule/Stigler的统计史细节——写论文引言时可引用</li>
+</ul>
+
+<!-- Appendix A -->
+<h2 id="s34-appendix-a">Appendix A · 公式详细推导 <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<h3 id="s34-appendix-A1">A.1 式3.4.1/3.4.2的由来与Galton身高公式 <a href="#s34-2-1-2" class="app-back">↩正文</a></h3>
+<div class="derivation-step">
+  <strong>起点：</strong>$D_i$ 随机分配 ⇒ $D_i$ 与 $\{Y_{1i},Y_{0i}\}$ 独立。
+</div>
+<div class="derivation-step">
+  <strong>第1步：</strong>$\mathbb{E}[Y \mid D=1] - \mathbb{E}[Y \mid D=0] = \mathbb{E}[Y_{1i} \mid D=1] - \mathbb{E}[Y_{0i} \mid D=0] = \mathbb{E}[Y_{1i}] - \mathbb{E}[Y_{0i}] = \mathbb{E}[Y_{1i}-Y_{0i}]$（式3.4.1）——与Y的支撑无关。Y为伯努利时即 $\mathbb{P}[Y_{1i}=1] - \mathbb{P}[Y_{0i}=1]$（式3.4.2）。
+</div>
+<div class="derivation-step">
+  <strong>第2步（Galton）：</strong>身高分布代际不变 ⇒ $\mathbb{E}[Y]=\mathbb{E}[x]=\mu$、$V(Y)=V(x)$。二元回归斜率 $\beta_1 = \mathrm{cov}(Y,x)/V(x)$；代际方差相等使 $V(x) = \sqrt{V(x)}\sqrt{V(Y)}$，故：
+  $$\beta_1 = \frac{\mathrm{cov}(Y_i, x_i)}{V(x_i)} = \frac{\mathrm{cov}(Y_i, x_i)}{\sqrt{V(x_i)}\sqrt{V(Y_i)}} = \rho_{xy}$$
+  截距 $\alpha = \mathbb{E}[Y] - \beta_1\mathbb{E}[x] = \mu(1-\rho_{xy})$。条件期望 $\mathbb{E}[Y \mid x] = \mu(1-\rho_{xy}) + \rho_{xy}x$——子女身高=父母身高与总体均值的加权平均。$0 \lt \rho_{xy} \lt 1$ 时，极端父母的后代期望向 $\mu$ 收缩：Galton的"向均值回归"。纯描述性规律，无因果内容。
+</div>
+
+<h3 id="s34-appendix-A2">A.2 COP分解与选择偏误（式3.4.4/3.4.5） <a href="#s34-2-1-2" class="app-back">↩正文</a></h3>
+<div class="derivation-step">
+  <strong>起点：</strong>非负Y的期望=条件于 $Y>0$ 的期望×概率。处理组差分解：
+  $$\mathbb{E}[Y \mid D=1] - \mathbb{E}[Y \mid D=0] = \underbrace{\{\mathbb{P}[Y>0 \mid D=1] - \mathbb{P}[Y>0 \mid D=0]\}}_{\text{参与效应}}\cdot \mathbb{E}[Y \mid Y>0, D=1] + \{\mathbb{E}[Y \mid Y>0, D=1] - \mathbb{E}[Y \mid Y>0, D=0]\}\cdot \mathbb{P}[Y>0 \mid D=0] \tag{3.4.4}$$
+</div>
+<div class="derivation-step">
+  <strong>第1步：</strong>第二块（COP差）进一步分解：
+  $$\mathbb{E}[Y \mid Y>0, D=1] - \mathbb{E}[Y \mid Y>0, D=0] = \underbrace{\mathbb{E}[Y_{1i}-Y_{0i} \mid Y_{1i}>0]}_{\text{因果效应}} + \underbrace{\{\mathbb{E}[Y_{0i} \mid Y_{1i}>0] - \mathbb{E}[Y_{0i} \mid Y_{0i}>0]\}}_{\text{选择性偏误}} \tag{3.4.5}$$
+  偏误的来源：随机实验改变了 $Y>0$ 群体的构成——自付150美元把边际使用者挤出正花费群体。条件在结果上，正是坏控制的精确定义。
+</div>
+
+<!-- Appendix B -->
+<h2 id="s34-appendix-b">Appendix B · 补充材料与延伸阅读 <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<h3>B.1 关键数据表</h3>
+<table>
+  <tr><th>表</th><th>内容</th><th>关键数字</th><th>作用</th></tr>
+  <tr><td>表3.5</td><td>兰德HIE两处理组均值（1984年美元）</td><td>就诊4.55 vs 3.02；门诊340 vs 235；总花费749 vs 608（差-141）</td><td>随机化下OLS=ATE与Y类型无关的演示</td></tr>
+  <tr><td>表3.6</td><td>Angrist-Evans(1998)样本：抚养孩子对女性劳动供给（N=254654）</td><td>就业率：OLS -0.162 vs probbit边际效应 -0.163/-0.162；工时：OLS -5.92 vs Tobit -6.56/-5.87</td><td>非线性模型边际效应≈OLS的实证</td></tr>
+</table>
+
+<h3>B.2 引用文献速查</h3>
+<table>
+  <tr><th>引用</th><th>页码</th><th>本节中的作用</th></tr>
+  <tr><td>Pfeffermann (1993); Deaton (1997)</td><td>p076, 087</td><td>加权的两种思路；对Tobit的吐槽</td></tr>
+  <tr><td>Manning et al. (1987)</td><td>p078-079</td><td>兰德健康保险实验（表3.5）</td></tr>
+  <tr><td>Angrist &amp; Evans (1998)</td><td>p078, 085-086</td><td>生育对女性劳动供给（表3.6样本）</td></tr>
+  <tr><td>Angrist (2001)</td><td>p083</td><td>分布效应分析：1[Y&gt;c]回归（抚养小孩对工作时间）</td></tr>
+  <tr><td>McDonald &amp; Moffitt (1980)</td><td>p082</td><td>Tobit条件期望表达式（3.4.6）</td></tr>
+  <tr><td>Hay &amp; Olsen (1984)</td><td>p082</td><td>删失回归的潜成本建模</td></tr>
+  <tr><td>Chamberlain (1994)</td><td>p083</td><td>CPS收入截断压低教育回报估计</td></tr>
+  <tr><td>Wooldridge (2006)</td><td>p085</td><td>Tobit边际效应的简洁形式（3.4.9）</td></tr>
+  <tr><td>Powell (1989)</td><td>p087</td><td>没有误差分布F时Tobit的β不可识别</td></tr>
+  <tr><td>Galton (1886)</td><td>p087-088</td><td>"回归"一词的来源；向均值回归</td></tr>
+  <tr><td>Yule (1899)</td><td>p088-089</td><td>第一篇多元回归论文：贫困率与济贫法案</td></tr>
+  <tr><td>Stigler (1986)</td><td>p089</td><td>回归的统计史</td></tr>
+</table>
+
+<h3>B.3 Stata实操对应</h3>
+<pre><code>* 分组数据按组规模还原微观回归（§3.4.1）
+collapse (mean) y [aweight=n], by(x)
+regress y x [aweight = n]
+
+* LDV：OLS合法；非线性模型看边际效应（§3.4.2）
+regress y x, robust                  // LPM，直接读概率效应
+probit y x
+margins, dydx(*)                     // 边际效应应与LPM系数接近（表3.6）
+
+* 分布效应：1[Y&gt;c]回归（Angrist 2001）
+gen d100 = (y &gt; 100)
+regress d100 x, robust
+</code></pre>
+
+<h3>B.4 本节在全章中的位置</h3>
+<div class="problem-tree">
+  <div class="root-q">§3.4把前三节的理论落成操作纪律，并以命名史收束全章。</div>
+  <ul class="tree-list">
+    <li>§3.1：回归的统计学身份——CEF近似 + 渐进推断</li>
+    <li>§3.2：因果条件——CIA、OVB公式、坏控制</li>
+    <li>§3.3：异质性——回归=方差加权的匹配估计量、倾向评分</li>
+    <li>§3.4（本节）：操作细节——加权判据、LDV与边际效应、命名史</li>
+  </ul>
+</div>
+
+
+<!-- 全章逻辑链 -->
+<h2 id="chap3">§3 · 全章逻辑链 <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<p>本章的全部论证可以串成一条四段式的主线。</p>
+
+<p>从"观察数据下回归无法自动获得因果解释"这个诚实的起点出发，先做减法：把因果问题整个搁置，建立回归的统计学身份——用CEF概括"教育预测收入"这类系统性随机性，证明它可分解、可预测、可做方差分析；然后证明回归是CEF的最佳线性近似（线性时就是CEF本身），解构回归公式说明每个多元系数都在剔除其他变量影响后度量净关系，Angrist（1998）的分组数据研究展示了这个身份的实战价值；接着用矩估计定义OLS，用大数定理、中心极限定理、斯拉茨基定理推出三明治方差公式，确立稳健标准误为默认；最后用饱和模型回答"近似何时变精确"。到§3.1结束时，回归作为一个统计对象——是什么、怎么推断、何时精确——全部就位，且全程没有动用因果二字。</p>
+
+<p>第二步做加法：引入潜在结果与CIA，把"观察到的差距=因果效应+选择性偏误"摆上桌面，说明只有给定 $X_i$ 后处理"就像被随机分配的那样好"，偏误才会消失；在CIA加线性常数效应假设下，长回归的 $\rho$ 就是因果效应；遗漏变量偏误公式把CIA失败的方向和大小具体化（NLSY教育回报从0.132降到0.087的演示），并给出CIA可信的两条途径——自然实验的随机分配（Black等2003的抽签、英国教育维持计划）与制度知识（Angrist 1998的军方筛选规则）；最后反向设防：本身是结果的变量是坏控制（白领职业例子），代理控制虽稀释真效应但优于不加，统一判据落在时间先后上。</p>
+
+<p>第三步做推广：撤掉常数效应假设，用解构回归公式证明回归系数是各组效应 $\delta_x$ 以"处理条件方差"为权的加权平均——回归是一种特殊加权的匹配估计量，与匹配的差别只在权重（老兵数据表3.2的显著分歧是活证）；协变量高维时，倾向评分定理把控制对象压缩成一个标量而不损失CIA，逆概率加权揭示回归、匹配、PSM同属Hirano-Imbens-Ridder加权族；NSW实验与Lalonde（1986）的历史教训则把理论等价落成操作分工——回归为默认起点，倾向评分担任修剪共同支撑与验证的辅助角色。</p>
+
+<p>第四步做收束：加权只用于把估计对准总体（抽样权重、分组还原），为效率加权不值得；有限被解释变量不构成换模型的理由——随机化下OLS斜率就是ATE，probit/Tobit只是曲线拟合工具，边际效应与OLS几乎相同（表3.6），COP分解是坏控制偏误的翻版，Tobit留给真正的删失数据；最后用命名史完成解释纪律——"回归"来自Galton对身高向均值回归的描述性观察，因果多元回归始于Yule（1899）的济贫法案研究，描述性规律与因果解释永远是两回事。</p>
+
+<p>放回全书看：第2章给了"回归能算处理—对照差异"的操作工具，本章为这个工具补上了完整的身份证明——统计上它是CEF的最优线性近似（§3.1），因果上它的解释需要CIA作为通行证（§3.2），异质性下它是方差加权的平均效应（§3.3），操作上它不需要加权和非线性模型的"升级"（§3.4）。第4章的匹配方法与工具变量、第7章的分位数回归、第8章的推断问题，全部建立在这个身份证明之上。</p>
+
+<!-- 全章总结 -->
+<h2 id="chap35">§3.5 · 全章总结 <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<div class="chapter-summary">
+  <h3>一句话总览</h3>
+  <p><strong>回归的合法性有两层，必须分开：统计层永远成立——回归是条件期望函数的最佳线性近似，推断只需大样本加稳健标准误；因果层有条件——需要条件独立假设作为通行证。异质性不摧毁因果身份，只把系数变成方差加权的平均效应；操作上不随便加权、不迷信非线性模型；而"回归"一词的本义提醒你，描述性规律与因果解释永远是两回事。</strong></p>
+
+  <h3>四节各自回答了总问题的哪一块</h3>
+  <p><strong><a href="#s31-0">§3.1（统计身份）</a></strong>回答"回归作为工具是什么"：CEF三大性质（分解/预测/方差分析）是基准语言；回归=CEF的最优线性近似（定理3.1.6）；解构回归公式（Frisch-Waugh）给每个系数"剔除其他变量后"的含义；三明治方差公式让推断不依赖同方差；饱和模型证明"近似可以变精确"。核心收获：OLS系数永远是合法的描述对象，问题只在它描述什么。</p>
+  <p><strong><a href="#s32-0">§3.2（因果条件）</a></strong>回答"什么时候它是因果效应"：CIA（给定X后处理像随机分配）是唯一通行证；OVB公式把"没控制好"量化为 $\gamma'\delta_{Ai}$；NLSY演示0.132→0.087；坏控制警告"加错变量制造新偏误"，统一判据是时间先后。核心收获：因果解释的全部代价是一个假设，全部工作是一段制度论证。</p>
+  <p><strong><a href="#s33-0">§3.3（异质性）</a></strong>回答"效应因人而异时它估计什么"：$\delta_R$=条件方差加权的 $\delta_x$ 平均（3.3.7），匹配用处理概率加权，两者分歧可统计显著（表3.2）；倾向评分定理降维无损；回归/匹配/PSM同属一个加权族；NSW与Lalonde给出实践分工。核心收获：报告系数时要说出它是哪个加权对象，异质性分析就是在拆这个加权平均。</p>
+  <p><strong><a href="#s34-0">§3.4（操作细节）</a></strong>回答"落地时哪些细节该守该弃"：加权只用于对准总体（pweights/分组），效率加权不划算；LDV不构成换模型的理由（HIE证明），边际效应≈OLS（表3.6），COP分解是坏控制的翻版，Tobit留给真删失；命名史收束解释纪律。核心收获：回归的默认地位有实验证据支撑，"如果东西还没坏，就别急着去修"。</p>
+
+  <h3>全章最该带走的三个操作性结论</h3>
+  <p>① 所有回归表默认报稳健（聚类）标准误，别为异方差加权——软件默认的同方差标准误才是强假设；② 主回归的控制变量逐一过"时间先后"关：处理之前被决定的才合格，机制变量永远放被解释变量一侧；③ 报告treat_post这类系数时用"条件均值（加权平均）效应"的语言，不用个体预测的语言，并用逐步加控制变量的系数移动作为偏误诊断。</p>
+</div>
+
+<!-- 全章Takeaway -->
+<h2 id="chap5">§5 · 全章 Takeaway <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<div class="takeaway">
+  回归的合法性有两层，必须分开：统计层永远成立——它是条件期望函数的最佳线性近似，推断只需大样本加稳健标准误；因果层有条件——需要条件独立假设作为通行证，代价可被OVB公式量化，边界由"时间先后"划定。异质性不摧毁因果身份，只把系数变成方差加权的平均效应。而"回归"一词的本义——向均值回归——永远提醒你：描述性规律与因果解释是两回事。
+</div>
+
+<!-- 全章Next -->
+<h2 id="chap6">§6 · 全章 Next <a href="#toc" class="back-to-toc">↑Contents</a></h2>
+
+<ul class="todo-list">
+  <li class="pri-1">CEF分解性质（定理3.1.1）——残差与X的任何函数正交，是全章反复借用的钥匙</li>
+  <li class="pri-1">定理3.1.6（CEF回归定理）——你解释任何回归系数的语言基础</li>
+  <li class="pri-1">三明治方差公式（3.1.7）与LPM必然异方差——你所有标准误选择的依据</li>
+  <li class="pri-1">CIA与观察差距分解（3.2.1/3.2.2）——你因果解释的根基；OVB公式——你的偏误诊断程序</li>
+  <li class="pri-1">坏控制与时间先后判据——直接约束你的主回归与机制分析</li>
+  <li class="pri-1">$\delta_R$=方差加权平均（3.3.7）与共同支撑修剪（Crump规则）——你解释系数与做稳健性的工具</li>
+  <li class="pri-2">Yitzhaki平均导数公式与正态特例——连续处理时才需要</li>
+  <li class="pri-2">倾向评分定理的证明细节与Hahn悖论——用到PSM时再深读</li>
+  <li class="pri-2">probit/Tobit的公式细节（3.4.3-3.4.9）——审稿人要求非线性模型时再翻</li>
+  <li class="pri-2">Galton/Yule/Stigler的统计史细节——写论文引言时可引用</li>
+</ul>
+
+</body>
+</html>
