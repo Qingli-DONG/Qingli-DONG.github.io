@@ -147,10 +147,9 @@ nav {
   color: var(--white-dim);
 }
 
-/* 主区：margin-top:auto 把它推到下半屏，紧邻底区信息条 */
+/* 主区：在剩余空间里垂直居中，读作封面 */
 .hero-main {
-  margin-top: auto;
-  padding-bottom: clamp(1.6rem, 4vh, 2.6rem);
+  margin: auto 0;
 }
 
 .hero h1 {
@@ -177,30 +176,36 @@ nav {
   color: var(--white-dim);
 }
 
-/* 底区：贴首屏底边的信息条，压在发丝线之下 */
+/* 封面底部：只留一个右对齐的滚动提示（个人信息已移到 01 关于） */
 .hero-foot {
-  border-top: 1px solid var(--hairline);
-  padding-top: clamp(0.9rem, 2vh, 1.3rem);
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.9rem clamp(1.6rem, 4vw, 3.4rem);
+  justify-content: flex-end;
 }
 
-.hero-foot .meta-item {
-  font-size: 0.8rem;
+/* 关于页的个人信息条：发丝线之上，「小标签 + 值」两行式 */
+.about-info {
+  margin-top: clamp(2.2rem, 5vh, 3.4rem);
+  padding-top: clamp(1rem, 2.4vh, 1.6rem);
+  border-top: 1px solid var(--hairline);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem clamp(1.6rem, 4vw, 3.4rem);
+}
+
+.about-info .meta-item {
+  font-size: 0.85rem;
   color: var(--white-dim);
 }
 
 /* 信息条的小标签：小字号 + 宽字距，与全站标签语汇一致 */
-.hero-foot .meta-item b {
+.about-info .meta-item b {
   display: block;
   font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--white-faint);
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.35rem;
 }
 
 /* 滚动提示改为底区右端的小标签，不再绝对定位（否则会压住信息条） */
