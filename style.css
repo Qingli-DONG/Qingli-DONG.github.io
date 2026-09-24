@@ -1,22 +1,19 @@
 /* ============================================================
-   董庆黎个人主页样式表（GitHub Pages）
-   设计语言：学术深蓝 + 浅灰背景 + 白色卡片
-   零外部依赖：纯 CSS，字体使用系统自带（中文环境显示更稳定）
+   董庆黎个人主页样式表（克莱因蓝 · 编辑排版风）
+   ------------------------------------------------------------
+   设计语言：国际克莱因蓝 #002fa7 满版纯色
+             超大字重标题 + 宽字距全大写拉丁小标签
+             发丝分割线 + 悬停聚焦列表（hover 时其余项变暗）
+   零外部依赖：不加载任何外部字体或 CDN，字体全部走系统字体栈
    ============================================================ */
 
-/* ---------- 1. CSS 变量与基础重置 ---------- */
+/* ---------- 1. 设计变量 ---------- */
 :root {
-  --navy-900: #0b1a33;   /* 最深蓝：hero 背景与页脚 */
-  --navy-700: #16335c;   /* 次深蓝 */
-  --blue-600: #2563eb;   /* 主强调色：按钮、链接 */
-  --blue-700: #1d4ed8;   /* 主强调色 hover */
-  --blue-100: #dbeafe;   /* 浅蓝：标签底色 */
-  --ink: #1e293b;        /* 正文文字色 */
-  --muted: #64748b;      /* 次要文字色 */
-  --bg: #f6f8fb;         /* 页面浅灰背景 */
-  --bg-alt: #ffffff;     /* 交替区块白背景 */
-  --card: #ffffff;       /* 卡片背景 */
-  --border: #e2e8f0;     /* 卡片描边 */
+  --klein: #002fa7;                          /* 国际克莱因蓝 IKB，满版底色 */
+  --white: #ffffff;
+  --white-dim: rgba(255, 255, 255, 0.72);    /* 正文级次要文字（保证小字对比度） */
+  --white-faint: rgba(255, 255, 255, 0.45);  /* 装饰级最弱文字 */
+  --hairline: rgba(255, 255, 255, 0.28);     /* 发丝分割线 */
 }
 
 * {
@@ -26,440 +23,473 @@
 }
 
 html {
-  scroll-behavior: smooth; /* 点击导航锚点平滑滚动 */
+  scroll-behavior: smooth;
 }
 
 body {
+  background: var(--klein);
+  color: var(--white);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
     "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
-  color: var(--ink);
-  background: var(--bg);
-  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* 选中文字时反色，强化单一色块的身份感 */
+::selection {
+  background: var(--white);
+  color: var(--klein);
 }
 
 a {
-  color: var(--blue-600);
+  color: inherit;
   text-decoration: none;
 }
 
-/* ---------- 2. 通用容器与区块 ---------- */
-.container {
-  max-width: 1040px;
-  margin: 0 auto;
-  padding: 0 24px;
-}
-
-.section {
-  padding: 84px 0;
-}
-
-.section-alt {
-  background: var(--bg-alt); /* 与浅灰背景交替，形成节奏 */
-}
-
-/* 锚点定位时给导航栏留出高度，避免标题被遮挡 */
-.section,
-#top {
-  scroll-margin-top: 70px;
-}
-
-/* 区块标题：英文小标签 + 中文大标题 + 蓝色短横线 */
-.section-title {
-  text-align: center;
-  margin-bottom: 48px;
-}
-
-.section-label {
-  font-size: 12px;
-  letter-spacing: 3px;
-  color: var(--blue-600);
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-
-.section-title h2 {
-  font-size: 30px;
-  font-weight: 700;
-  color: var(--navy-900);
-}
-
-.section-title h2::after {
-  content: "";
-  display: block;
-  width: 40px;
-  height: 3px;
-  margin: 14px auto 0;
-  border-radius: 2px;
-  background: linear-gradient(90deg, var(--blue-600), #7ba7f5);
-}
-
-/* ---------- 3. 顶部导航栏 ---------- */
-.navbar {
-  position: sticky;
+/* ---------- 2. 顶部白色跑马灯条 ---------- */
+.ticker {
+  position: fixed;
   top: 0;
-  z-index: 100;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(8px); /* 毛玻璃效果 */
-  border-bottom: 1px solid var(--border);
-}
-
-.nav-inner {
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: var(--white);
+  color: var(--klein);
+  overflow: hidden;
+  white-space: nowrap;
+  height: 2rem;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 10px;
-  padding-top: 14px;
-  padding-bottom: 14px;
 }
 
-.nav-brand {
-  font-size: 18px;
+.ticker-track {
+  display: inline-flex;
+  gap: 0;
+  animation: tick 28s linear infinite;
+}
+
+.ticker span {
+  font-size: 0.68rem;
   font-weight: 700;
-  color: var(--navy-900);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding-right: 3.2em;
 }
 
-.nav-brand-en {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--muted);
-  margin-left: 6px;
+/* 轨道内放两份完全相同的内容，位移 50% 即可无缝循环 */
+@keyframes tick {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* ---------- 3. 顶部导航 ---------- */
+nav {
+  position: fixed;
+  top: 2rem;                 /* 让开上方跑马灯条 */
+  left: 0;
+  right: 0;
+  z-index: 50;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.1rem clamp(1.4rem, 5vw, 4rem);
+}
+
+.nav-name {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
 }
 
 .nav-links {
   display: flex;
-  gap: 26px;
-  flex-wrap: wrap;
+  gap: clamp(1.2rem, 3vw, 2.6rem);
+  list-style: none;
 }
 
 .nav-links a {
-  color: var(--muted);
-  font-size: 15px;
-  transition: color 0.2s;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  transition: opacity 0.2s linear;
 }
 
-.nav-links a:hover {
-  color: var(--blue-600);
-}
+/* 悬停某一项时，同级其他项整体变暗——聚焦式导航 */
+.nav-links:hover a { opacity: 0.25; }
+.nav-links a:hover { opacity: 1; }
 
-/* ---------- 4. 首屏 Hero ---------- */
+/* ---------- 4. 首屏 ---------- */
 .hero {
-  background: linear-gradient(160deg, var(--navy-900) 0%, var(--navy-700) 65%, #1d4ed8 140%);
-  color: #ffffff;
-  text-align: center;
-  padding: 110px 0 120px;
-}
-
-.hero-avatar {
-  width: 96px;
-  height: 96px;
-  margin: 0 auto 28px;
-  border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.4);
-  background: rgba(255, 255, 255, 0.12);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 42px;
-  font-family: "STSong", "SimSun", serif; /* 宋体让"董"字更有书卷气 */
-}
-
-.hero-label {
-  font-size: 12px;
-  letter-spacing: 4px;
-  color: rgba(255, 255, 255, 0.65);
-  font-weight: 600;
-  margin-bottom: 16px;
-}
-
-.hero-name {
-  font-size: 46px;
-  font-weight: 700;
-  margin-bottom: 10px;
-}
-
-.hero-name-en {
-  font-size: 26px;
-  font-weight: 400;
-  color: rgba(255, 255, 255, 0.75);
-}
-
-.hero-title {
-  font-size: 19px;
-  color: rgba(255, 255, 255, 0.9);
-  margin-bottom: 22px;
-}
-
-.hero-desc {
-  font-size: 16px;
-  color: rgba(255, 255, 255, 0.75);
-  margin-bottom: 38px;
-}
-
-.hero-buttons {
-  display: flex;
-  gap: 16px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-/* ---------- 5. 按钮 ---------- */
-.btn {
-  display: inline-block;
-  padding: 12px 30px;
-  border-radius: 999px;
-  font-size: 15px;
-  font-weight: 600;
-  transition: all 0.2s;
-}
-
-/* 深色背景上的实心按钮 */
-.btn-primary {
-  background: var(--blue-600);
-  color: #ffffff;
-}
-.btn-primary:hover {
-  background: var(--blue-700);
-  transform: translateY(-2px);
-}
-
-/* 深色背景上的描边按钮 */
-.btn-ghost {
-  border: 1.5px solid rgba(255, 255, 255, 0.5);
-  color: #ffffff;
-}
-.btn-ghost:hover {
-  background: rgba(255, 255, 255, 0.12);
-  transform: translateY(-2px);
-}
-
-/* 浅色背景上的实心按钮 */
-.btn-solid {
-  background: var(--blue-600);
-  color: #ffffff;
-}
-.btn-solid:hover {
-  background: var(--blue-700);
-  transform: translateY(-2px);
-}
-
-/* 浅色背景上的描边按钮 */
-.btn-outline {
-  border: 1.5px solid var(--blue-600);
-  color: var(--blue-600);
-}
-.btn-outline:hover {
-  background: var(--blue-100);
-  transform: translateY(-2px);
-}
-
-/* ---------- 6. 关于我 ---------- */
-.about-text {
-  max-width: 780px;
-  margin: 0 auto;
-}
-
-.about-text p {
-  margin-bottom: 18px;
-  font-size: 16px;
-  color: var(--ink);
-}
-
-/* ---------- 7. 研究方向卡片 ---------- */
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 桌面端 2 列 */
-  gap: 24px;
-}
-
-.card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 30px 28px;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 14px 28px rgba(15, 30, 60, 0.09);
-}
-
-.card-icon {
-  font-size: 30px;
-  margin-bottom: 14px;
-}
-
-.card h3 {
-  font-size: 19px;
-  color: var(--navy-900);
-  margin-bottom: 8px;
-}
-
-.card p {
-  font-size: 15px;
-  color: var(--muted);
-}
-
-/* ---------- 8. 研究项目卡片 ---------- */
-.project-list {
+  position: relative;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  justify-content: flex-end;   /* 主标题压在首屏底部，留出上方整片蓝 */
+  padding: 0 clamp(1.4rem, 5vw, 4rem) clamp(2.5rem, 7vh, 5rem);
 }
 
-.project-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-left: 4px solid var(--blue-600); /* 左侧蓝色竖条，突出"学术项目"感 */
-  border-radius: 0 14px 14px 0;
-  padding: 28px 30px;
-  transition: transform 0.2s, box-shadow 0.2s;
+.hero-kicker {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--white-dim);
+  margin-bottom: 1.6rem;
 }
 
-.project-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 14px 28px rgba(15, 30, 60, 0.09);
+.hero h1 {
+  font-weight: 800;
+  font-size: clamp(4.2rem, 15vw, 15rem);
+  line-height: 0.92;
+  letter-spacing: -0.045em;
 }
 
-.project-head {
+/* 英文名作为中文名的下一行，字号降一档并压暗 */
+.hero h1 .latin {
+  display: block;
+  font-size: clamp(2.2rem, 7.5vw, 7.4rem);
+  letter-spacing: -0.03em;
+  color: var(--white-dim);
+  margin-top: 0.35em;
+}
+
+.hero-statement {
+  margin-top: 2.4rem;
+  max-width: 34rem;
+  font-size: clamp(1rem, 1.6vw, 1.25rem);
+  line-height: 1.55;
+  color: var(--white-dim);
+}
+
+/* 右下角竖排滚动提示 */
+.hero-scroll {
+  position: absolute;
+  right: clamp(1.4rem, 5vw, 4rem);
+  bottom: clamp(2.5rem, 7vh, 5rem);
+  writing-mode: vertical-rl;
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--white-faint);
+}
+
+/* 左上角笑脸 */
+.smiley {
+  position: absolute;
+  top: 6.5rem;
+  left: clamp(1.4rem, 5vw, 4rem);
   display: flex;
   align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-bottom: 10px;
+  gap: 1rem;
+  user-select: none;
 }
 
-.project-head h3 {
-  font-size: 20px;
-  color: var(--navy-900);
-}
-
-/* 项目类型徽章 */
-.project-badge {
-  font-size: 12px;
+.smiley .face {
+  display: inline-block;
+  font-size: clamp(2.2rem, 3.8vw, 3.4rem);
   font-weight: 700;
-  color: #ffffff;
-  background: var(--blue-600);
-  padding: 3px 12px;
-  border-radius: 999px;
+  letter-spacing: -0.02em;
 }
 
-.project-badge-light {
-  color: var(--blue-700);
-  background: var(--blue-100);
+.smiley .word {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--white-faint);
 }
 
-.project-card p {
-  font-size: 15px;
-  color: var(--ink);
-  margin-bottom: 16px;
+/* ---------- 5. 板块通用 ---------- */
+section {
+  border-top: 1px solid var(--hairline);
+  padding: clamp(4rem, 10vh, 7rem) clamp(1.4rem, 5vw, 4rem);
+  scroll-margin-top: 5.5rem;   /* 锚点跳转时避开固定导航 */
 }
 
-/* 技术标签 */
-.tag {
+/* 板块头：左侧标题 + 右侧编号，两端对齐 */
+.sec-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: clamp(2.5rem, 6vh, 4rem);
+}
+
+.sec-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.sec-num {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  color: var(--white-faint);
+}
+
+/* ---------- 6. 关于 ---------- */
+.about p {
+  max-width: 44rem;
+  font-size: clamp(1.3rem, 2.6vw, 2.1rem);
+  line-height: 1.4;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+/* 句中压暗的关键词 */
+.about p em {
+  font-style: normal;
+  color: var(--white-faint);
+}
+
+/* ---------- 7. 研究兴趣：大字列表 + 悬停聚焦 ---------- */
+.focus-list {
+  list-style: none;
+}
+
+.focus-list li {
+  border-top: 1px solid var(--hairline);
+  transition: opacity 0.25s linear;
+}
+
+.focus-list li:last-child {
+  border-bottom: 1px solid var(--hairline);
+}
+
+.focus-list:hover li { opacity: 0.22; }
+.focus-list li:hover { opacity: 1; }
+
+.focus-list a {
+  display: flex;
+  align-items: baseline;
+  gap: clamp(1.2rem, 3vw, 3rem);
+  padding: clamp(1.4rem, 3.2vh, 2.2rem) 0;
+}
+
+.focus-list .idx {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  color: var(--white-faint);
+  min-width: 2.4rem;
+}
+
+.focus-list .zh {
+  font-size: clamp(1.8rem, 4.5vw, 3.6rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.focus-list .en {
+  margin-left: auto;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--white-faint);
+  text-align: right;
+}
+
+/* ---------- 8. 项目 / 笔记：年份 + 标题的横向条目 ---------- */
+.projects {
+  position: relative;
+}
+
+.project {
+  display: grid;
+  grid-template-columns: 5rem 1fr;
+  gap: clamp(1.2rem, 3vw, 3rem);
+  border-top: 1px solid var(--hairline);
+  padding: clamp(1.6rem, 3.5vh, 2.4rem) 0;
+  transition: opacity 0.25s linear;
+}
+
+/* 悬停某一条时，其余条目整体变暗 */
+.projects:hover .project { opacity: 0.22; }
+.projects .project:hover { opacity: 1; }
+
+.project:last-child {
+  border-bottom: 1px solid var(--hairline);
+}
+
+.project .year {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: var(--white-faint);
+  padding-top: 0.5em;
+}
+
+.project h3 {
+  font-size: clamp(1.25rem, 2.4vw, 1.8rem);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  margin-bottom: 0.5rem;
+}
+
+.project p {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--white-dim);
+  max-width: 40rem;
+}
+
+/* 条目底部的描边小标签 */
+.project .tag {
   display: inline-block;
-  padding: 4px 12px;
-  margin: 0 8px 8px 0;
-  background: var(--blue-100);
-  color: var(--blue-700);
-  border-radius: 999px;
-  font-size: 13px;
+  margin-top: 0.9rem;
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  border: 1px solid var(--hairline);
+  padding: 0.35em 0.9em;
 }
 
-.project-link {
+/* 可点击条目：标题下方加一条随悬停显现的白色下划线 */
+.project .go {
   display: inline-block;
-  margin-top: 6px;
-  font-size: 15px;
+  margin-top: 0.9rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--white-faint);
+  padding-bottom: 0.25em;
+  transition: border-color 0.2s linear;
+}
+
+.project a:hover .go {
+  border-color: var(--white);
+}
+
+/* ---------- 9. 技能：三栏 + 描边标签 ---------- */
+.skills {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(1.6rem, 4vw, 3.4rem);
+}
+
+.skill-col h3 {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding-bottom: 0.9rem;
+  margin-bottom: 1.2rem;
+  border-bottom: 1px solid var(--hairline);
+}
+
+/* 分组名里的中文说明，弱化处理 */
+.skill-col h3 span {
+  color: var(--white-faint);
   font-weight: 600;
 }
 
-.project-link:hover {
-  text-decoration: underline;
+.skill-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
-/* ---------- 9. 技能 ---------- */
-.skill-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr); /* 桌面端 3 列 */
-  gap: 24px;
-}
-
-.skill-group {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 28px 26px;
-}
-
-.skill-group h3 {
-  font-size: 17px;
-  color: var(--navy-900);
-  margin-bottom: 16px;
+.skill-tags span {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  border: 1px solid var(--hairline);
+  padding: 0.35em 0.85em;
 }
 
 /* ---------- 10. 联系 ---------- */
-.contact-inner {
-  text-align: center;
+.contact .mail {
+  display: inline-block;
+  font-size: clamp(1.6rem, 5vw, 4rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  border-bottom: 2px solid var(--white);
+  transition: opacity 0.2s linear;
+  word-break: break-all;
 }
 
-.contact-text {
-  font-size: 16px;
-  color: var(--muted);
-  margin: -24px 0 32px; /* 上移，收紧与标题的间距 */
-}
+.contact .mail:hover { opacity: 0.6; }
 
-.contact-buttons {
+.contact .social {
+  margin-top: 2.5rem;
   display: flex;
-  gap: 16px;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-bottom: 26px;
+  gap: clamp(1.4rem, 3vw, 2.8rem);
+  list-style: none;
 }
 
-.contact-note {
-  font-size: 14px;
-  color: var(--muted);
+.contact .social a {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  transition: opacity 0.2s linear;
 }
+
+.contact .social:hover a { opacity: 0.25; }
+.contact .social a:hover { opacity: 1; }
 
 /* ---------- 11. 页脚 ---------- */
-.footer {
-  background: var(--navy-900);
-  color: rgba(255, 255, 255, 0.6);
-  text-align: center;
-  padding: 26px 0;
-  font-size: 13px;
+footer {
+  border-top: 1px solid var(--hairline);
+  padding: 1.6rem clamp(1.4rem, 5vw, 4rem);
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--white-faint);
 }
 
-/* ---------- 12. 响应式布局 ---------- */
+/* ---------- 12. 滚动淡入 ---------- */
+.reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.reveal.in {
+  opacity: 1;
+  transform: none;
+}
+
+/* 尊重系统「减弱动态效果」设置 */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .ticker-track { animation: none; }
+}
+
+/* ---------- 13. 响应式 ---------- */
 @media (max-width: 768px) {
-  .section {
-    padding: 60px 0;
-  }
-
-  .hero {
-    padding: 80px 0 90px;
-  }
-
-  .hero-name {
-    font-size: 34px;
-  }
-
-  .hero-name-en {
-    font-size: 20px;
-  }
-
-  /* 卡片与技能在手机上改为单列 */
-  .card-grid,
-  .skill-grid {
+  .skills {
     grid-template-columns: 1fr;
   }
 
-  .nav-inner {
-    justify-content: center; /* 手机端品牌与链接居中排列 */
+  .project {
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
   }
 
-  .nav-links {
-    gap: 16px;
+  .project .year { padding-top: 0; }
+}
+
+@media (max-width: 640px) {
+  .hero-scroll { display: none; }
+  .focus-list .en { display: none; }
+  .smiley { top: 5.5rem; }
+  footer {
+    flex-direction: column;
+    gap: 0.5rem;
   }
 }

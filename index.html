@@ -1,57 +1,243 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>董庆黎 · MHE 学习笔记</title>
-  <meta name="description" content="董庆黎的 MHE 学习笔记 —— 《Mostly Harmless Econometrics》第 3、4 章">
-  <!-- 网页小图标（emoji 版，无需额外图片文件） -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📖</text></svg>">
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>董庆黎 · 个人主页 | Qingli Dong</title>
+<meta name="description" content="董庆黎的个人主页 —— 暨南大学经济学本科生，研究方向：中国企业出海与对外直接投资（OFDI）">
+<!-- 网页小图标（emoji 版，无需额外图片文件） -->
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
+<link rel="stylesheet" href="style.css">
 </head>
-<body id="top">
+<body>
 
-  <!-- ==================== 首屏：只留名字 ==================== -->
-  <header class="hero">
-    <div class="container hero-inner">
-      <div class="hero-avatar">董</div>
-      <h1 class="hero-name">董庆黎 <span class="hero-name-en">Qingli Dong</span></h1>
-      <p class="hero-desc">《Mostly Harmless Econometrics》学习笔记</p>
+  <!-- ==================== 顶部白色跑马灯条 ==================== -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track">
+      <!-- 第一份 -->
+      <span>Firm Globalization</span><span>企业出海</span><span>OFDI</span><span>对外直接投资</span><span>Trade Policy</span><span>贸易政策</span><span>Causal Inference</span><span>因果推断</span><span>Customs Data</span><span>海关数据</span>
+      <!-- 第二份（与第一份完全相同，用于无缝循环） -->
+      <span>Firm Globalization</span><span>企业出海</span><span>OFDI</span><span>对外直接投资</span><span>Trade Policy</span><span>贸易政策</span><span>Causal Inference</span><span>因果推断</span><span>Customs Data</span><span>海关数据</span>
     </div>
+  </div>
+
+  <!-- ==================== 顶部导航 ==================== -->
+  <nav>
+    <a class="nav-name" href="#top">董庆黎</a>
+    <ul class="nav-links">
+      <li><a href="#about">关于</a></li>
+      <li><a href="#research">研究</a></li>
+      <li><a href="#projects">项目</a></li>
+      <li><a href="#notes">笔记</a></li>
+      <li><a href="#skills">技能</a></li>
+      <li><a href="#contact">联系</a></li>
+    </ul>
+  </nav>
+
+  <!-- ==================== 首屏 ==================== -->
+  <header class="hero" id="top">
+    <div class="smiley"><span class="face">:)</span><span class="word">welcome</span></div>
+    <p class="hero-kicker">个人主页 · Personal Homepage</p>
+    <h1>董庆黎<span class="latin">Qingli Dong</span></h1>
+    <p class="hero-statement">
+      暨南大学经济学专业本科生。研究中国企业出海与对外直接投资，
+      关注贸易政策的冲击如何改变企业走出去的方式与去向。
+      这里记录我的研究、数据与学习笔记。
+    </p>
+    <span class="hero-scroll">向下滚动 ↓</span>
   </header>
 
-  <!-- ==================== 学习笔记 ==================== -->
-  <section id="notes" class="section">
-    <div class="container">
-      <div class="section-title">
-        <p class="section-label">NOTES</p>
-        <h2>学习笔记</h2>
+  <main>
+
+    <!-- ==================== 01 关于 ==================== -->
+    <section class="about reveal" id="about">
+      <div class="sec-head">
+        <span class="sec-title">关于 / About</span>
+        <span class="sec-num">01</span>
       </div>
-      <div class="card-grid">
-        <!-- 第3章笔记 -->
-        <div class="card">
-          <div class="card-icon">📖</div>
-          <h3>第 3 章 · 回归的基本原理</h3>
-          <p>回归与因果关系、异质性与非线性、回归的细节（含附录推导）</p>
-          <a class="project-link" href="notes/MHE_第3章_笔记.html">阅读笔记 →</a>
-        </div>
-        <!-- 第4章笔记 -->
-        <div class="card">
-          <div class="card-icon">🧰</div>
-          <h3>第 4 章 · 工具变量回归</h3>
-          <p>工具变量与因果关系、两阶段最小二乘、双样本 IV、LATE 及其推广（含附录）</p>
-          <a class="project-link" href="notes/MHE_第4章_笔记.html">阅读笔记 →</a>
-        </div>
+      <p>
+        我是 <em>暨南大学</em> 经济学专业本科生，在 <em>陈方豪</em> 老师指导下做实证研究。
+        目前主要基于 <em>1978—2024 年中国海关出口企业匹配面板数据</em>，
+        用多期双重差分法研究 <em>美国 301 调查</em> 对中国企业对外直接投资的影响。
+        我关心一个具体的问题：贸易政策的冲击，如何改变企业走出去的方式与去向。
+        在方法上，我重视研究的可复现性，并尝试把 AI 工具接入实证工作流。
+      </p>
+    </section>
+
+    <!-- ==================== 02 研究兴趣 ==================== -->
+    <section class="reveal" id="research">
+      <div class="sec-head">
+        <span class="sec-title">研究兴趣 / Research Interests</span>
+        <span class="sec-num">02</span>
       </div>
-    </div>
-  </section>
+      <ul class="focus-list">
+        <li><a href="#projects"><span class="idx">01</span><span class="zh">企业出海与对外直接投资</span><span class="en">Firm Globalization</span></a></li>
+        <li><a href="#projects"><span class="idx">02</span><span class="zh">贸易政策评估</span><span class="en">Trade Policy</span></a></li>
+        <li><a href="#projects"><span class="idx">03</span><span class="zh">海关微观数据</span><span class="en">Customs Microdata</span></a></li>
+        <li><a href="#projects"><span class="idx">04</span><span class="zh">因果推断方法</span><span class="en">Causal Inference</span></a></li>
+      </ul>
+    </section>
+
+    <!-- ==================== 03 研究项目 ==================== -->
+    <section class="reveal" id="projects">
+      <div class="sec-head">
+        <span class="sec-title">研究项目 / Projects</span>
+        <span class="sec-num">03</span>
+      </div>
+      <div class="projects">
+
+        <article class="project">
+          <span class="year">2026</span>
+          <div>
+            <h3>301 调查与中国企业 OFDI 实证研究</h3>
+            <p>
+              基于中国海关出口企业匹配面板数据，用多期双重差分法识别美国 301 调查
+              对企业对外直接投资的影响，覆盖基准回归、平行趋势检验、稳健性检验、
+              机制分析与异质性分析。
+            </p>
+            <span class="tag">多期 DID · 事件研究法 · Stata</span>
+          </div>
+        </article>
+
+        <article class="project">
+          <span class="year">2026</span>
+          <div>
+            <h3>MHE 计量经济学课本转录与学习笔记</h3>
+            <p>
+              以整页 OCR 识别 + 逐字核验的工作流，将《Mostly Harmless Econometrics》
+              逐页转录为结构化笔记，沉淀计量方法学习资料。
+            </p>
+            <span class="tag">OCR · Markdown · Python</span>
+          </div>
+        </article>
+
+        <article class="project">
+          <span class="year">2025</span>
+          <div>
+            <h3>实证研究代码管理规范实践</h3>
+            <p>
+              遵循「可理解性、可追溯性、可复现性」三大原则组织 Stata 项目：
+              原始数据只读、代码生成中间数据、输出与图表分目录管理、全程日志留痕。
+            </p>
+            <span class="tag">可复现研究 · Stata</span>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- ==================== 04 学习笔记 ==================== -->
+    <section class="reveal" id="notes">
+      <div class="sec-head">
+        <span class="sec-title">学习笔记 / Notes</span>
+        <span class="sec-num">04</span>
+      </div>
+      <div class="projects">
+
+        <a class="project" href="notes/MHE_第3章_笔记.html">
+          <span class="year">第 3 章</span>
+          <div>
+            <h3>回归的基本原理</h3>
+            <p>回归与因果关系、异质性与非线性、回归的细节（含附录推导）——《Mostly Harmless Econometrics》第 3 章完整笔记。</p>
+            <span class="go">阅读笔记 →</span>
+          </div>
+        </a>
+
+        <a class="project" href="notes/MHE_第4章_笔记.html">
+          <span class="year">第 4 章</span>
+          <div>
+            <h3>工具变量回归</h3>
+            <p>工具变量与因果关系、两阶段最小二乘、双样本 IV、LATE 及其推广（含附录）——《Mostly Harmless Econometrics》第 4 章完整笔记。</p>
+            <span class="go">阅读笔记 →</span>
+          </div>
+        </a>
+
+      </div>
+    </section>
+
+    <!-- ==================== 05 技能 ==================== -->
+    <section class="reveal" id="skills">
+      <div class="sec-head">
+        <span class="sec-title">技能 / Skills</span>
+        <span class="sec-num">05</span>
+      </div>
+      <div class="skills">
+
+        <div class="skill-col">
+          <h3>计量方法 <span>· Methods</span></h3>
+          <div class="skill-tags">
+            <span>Stata</span>
+            <span>reghdfe 高维固定效应</span>
+            <span>多期 DID</span>
+            <span>事件研究法</span>
+            <span>平行趋势检验</span>
+            <span>稳健性诊断</span>
+          </div>
+        </div>
+
+        <div class="skill-col">
+          <h3>编程与工具 <span>· Tools</span></h3>
+          <div class="skill-tags">
+            <span>Python</span>
+            <span>Git &amp; GitHub</span>
+            <span>VS Code</span>
+            <span>Claude Code</span>
+            <span>飞书</span>
+          </div>
+        </div>
+
+        <div class="skill-col">
+          <h3>数据工作 <span>· Data</span></h3>
+          <div class="skill-tags">
+            <span>海关微观数据</span>
+            <span>面板数据清洗</span>
+            <span>数据可视化</span>
+            <span>PDF / OCR 自动化</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== 06 联系 ==================== -->
+    <section class="contact reveal" id="contact">
+      <div class="sec-head">
+        <span class="sec-title">联系 / Contact</span>
+        <span class="sec-num">06</span>
+      </div>
+      <a class="mail" href="mailto:Humphrey_DONG.Qingli@outlook.com">Humphrey_DONG.Qingli@outlook.com</a>
+      <ul class="social">
+        <li><a href="https://github.com/Qingli-DONG" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="https://Qingli-DONG.github.io" target="_blank" rel="noopener">Homepage</a></li>
+      </ul>
+    </section>
+
+  </main>
 
   <!-- ==================== 页脚 ==================== -->
-  <footer class="footer">
-    <div class="container">
-      <p>© 2026 董庆黎 · Qingli Dong</p>
-    </div>
+  <footer>
+    <span>© 2026 董庆黎 · 暨南大学</span>
+    <span>Economics · Research · Data</span>
   </footer>
 
+<script>
+  // 滚动淡入：元素进入视口时加 .in，只触发一次
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (e.isIntersecting) {
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+
+  // 左上角的笑脸偶尔眨一下眼
+  const face = document.querySelector('.smiley .face');
+  setInterval(() => {
+    face.textContent = ';)';
+    setTimeout(() => { face.textContent = ':)'; }, 350);
+  }, 4200);
+</script>
 </body>
 </html>
