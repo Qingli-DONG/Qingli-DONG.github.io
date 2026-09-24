@@ -147,9 +147,10 @@ nav {
   color: var(--white-dim);
 }
 
-/* 主区：在剩余空间里垂直居中，读作封面 */
+/* 主区：在剩余空间里垂直居中，并整体靠右，读作封面右栏 */
 .hero-main {
   margin: auto 0;
+  text-align: right;
 }
 
 .hero h1 {
