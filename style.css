@@ -121,14 +121,22 @@ nav {
 .nav-links:hover a { opacity: 0.25; }
 .nav-links a:hover { opacity: 1; }
 
-/* ---------- 4. 首屏 ---------- */
+/* ---------- 4. 首屏（占满一整屏：顶区小标签 → 主区名字 → 底区信息条） ---------- */
 .hero {
   position: relative;
-  min-height: 64vh;            /* 原 100vh：字号收小后整屏留白会显得空 */
+  min-height: 100vh;        /* 首屏占满一整屏 */
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  padding: 0 clamp(1.4rem, 5vw, 4rem) clamp(2.5rem, 6vh, 4rem);
+  padding: 6rem clamp(1.4rem, 5vw, 4rem) clamp(1.4rem, 3.5vh, 2rem);
+}
+
+/* 顶区：左笑脸 + 右小标签，两端对齐 */
+.hero-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.2rem;
+  flex-wrap: wrap;
 }
 
 .hero-kicker {
@@ -137,7 +145,12 @@ nav {
   letter-spacing: 0.24em;
   text-transform: uppercase;
   color: var(--white-dim);
-  margin-bottom: 1.1rem;
+}
+
+/* 主区：margin-top:auto 把它推到下半屏，紧邻底区信息条 */
+.hero-main {
+  margin-top: auto;
+  padding-bottom: clamp(1.6rem, 4vh, 2.6rem);
 }
 
 .hero h1 {
@@ -164,24 +177,44 @@ nav {
   color: var(--white-dim);
 }
 
-/* 右下角竖排滚动提示 */
+/* 底区：贴首屏底边的信息条，压在发丝线之下 */
+.hero-foot {
+  border-top: 1px solid var(--hairline);
+  padding-top: clamp(0.9rem, 2vh, 1.3rem);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.9rem clamp(1.6rem, 4vw, 3.4rem);
+}
+
+.hero-foot .meta-item {
+  font-size: 0.8rem;
+  color: var(--white-dim);
+}
+
+/* 信息条的小标签：小字号 + 宽字距，与全站标签语汇一致 */
+.hero-foot .meta-item b {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--white-faint);
+  margin-bottom: 0.3rem;
+}
+
+/* 滚动提示改为底区右端的小标签，不再绝对定位（否则会压住信息条） */
 .hero-scroll {
-  position: absolute;
-  right: clamp(1.4rem, 5vw, 4rem);
-  bottom: clamp(2.5rem, 7vh, 5rem);
-  writing-mode: vertical-rl;
+  margin-left: auto;
   font-size: 0.64rem;
   font-weight: 600;
-  letter-spacing: 0.3em;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
   color: var(--white-faint);
 }
 
-/* 左上角笑脸 */
+/* 笑脸改为随顶区排布，不再绝对定位 */
 .smiley {
-  position: absolute;
-  top: 6.5rem;
-  left: clamp(1.4rem, 5vw, 4rem);
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -485,9 +518,9 @@ footer {
 }
 
 @media (max-width: 640px) {
+  .hero { padding-top: 5rem; }
   .hero-scroll { display: none; }
   .focus-list .en { display: none; }
-  .smiley { top: 5.5rem; }
   footer {
     flex-direction: column;
     gap: 0.5rem;
