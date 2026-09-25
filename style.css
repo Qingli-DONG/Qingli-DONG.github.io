@@ -411,11 +411,12 @@ section {
   padding: 5.5rem clamp(1.4rem, 4vw, 3.4rem) clamp(2rem, 5vh, 3.2rem);
 }
 
-/* 右栏白块：里面放图 + 图例 + 出处，垂直居中，上下留白由它自己吃掉。
-   文字用蓝而非白，因为底已经是白的。 */
+/* 右栏：里面放图 + 图例 + 出处，垂直居中，上下留白由它自己吃掉。
+   （2026-09-26 试版：底色由白改回克莱因蓝，与左半屏连成一整块蓝场。
+     栏内文字随之由「白底蓝字」翻成「蓝底白字」，否则整栏全看不见。） */
 .panel-fig {
   margin: 0;
-  background: var(--white);
+  background: var(--klein);
   padding: clamp(1.8rem, 3.4vw, 3.4rem);
   display: flex;
   flex-direction: column;
@@ -427,12 +428,12 @@ section {
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--klein);
+  color: var(--white);
   margin-bottom: 0.8rem;
 }
 
 .panel-fig .fig-cap span {
-  color: rgba(0, 47, 167, 0.42);
+  color: var(--white-faint);
 }
 
 .panel-fig img {
@@ -458,14 +459,14 @@ section {
 .panel-fig .fig-lg .hi {
   font-size: 0.6rem;
   font-variant-numeric: tabular-nums;
-  color: rgba(0, 47, 167, 0.55);
+  color: var(--white-dim);
 }
 
 .panel-fig .fig-note {
   margin-top: 0.5rem;
   font-size: 0.6rem;
   line-height: 1.7;
-  color: rgba(0, 47, 167, 0.45);
+  color: var(--white-faint);
 }
 
 .panel-foot {
