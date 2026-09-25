@@ -253,24 +253,27 @@ section {
   padding-top: clamp(1.2rem, 2.6vh, 1.8rem);
   border-top: 1px solid var(--hairline);
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-  gap: clamp(1.2rem, 2.6vh, 1.8rem) clamp(1.6rem, 4vw, 3.4rem);
+  /* 列宽给到 18rem：字号放大后，邮箱那一项仍能整行放下不被截断 */
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: clamp(1.3rem, 3vh, 2rem) clamp(1.6rem, 4vw, 3.4rem);
 }
 
 .about-info .meta-item {
-  font-size: 0.85rem;
+  font-size: 1.15rem;          /* 原 0.85rem，正文级 */
+  line-height: 1.5;
   color: var(--white-dim);
+  overflow-wrap: anywhere;     /* 极窄屏兜底：长邮箱宁可折行也不溢出格子 */
 }
 
 /* 信息条的小标签：小字号 + 宽字距，与全站标签语汇一致 */
 .about-info .meta-item b {
   display: block;
-  font-size: 0.62rem;
+  font-size: 0.78rem;          /* 原 0.62rem，随正文一起放大 */
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--white-faint);
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.45rem;
 }
 
 /* ---------- 7. 研究兴趣：大字列表 + 悬停聚焦 ---------- */
