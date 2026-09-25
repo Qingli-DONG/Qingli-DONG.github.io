@@ -312,53 +312,92 @@ section {
 }
 .about-info .meta-item:nth-child(even):hover b { color: rgba(0, 47, 167, 0.5); }
 
-/* ---------- 7. 研究兴趣：大字列表 + 悬停聚焦 ---------- */
-.focus-list {
-  list-style: none;
+/* ---------- 7. 研究兴趣：一条一满屏 ---------- */
+/* 一条兴趣 = 一整屏。屏内沿用首屏（.hero）的三区结构：顶标签 / 中区 / 底落款。
+   中区左右分栏：左栏超大汉字，右栏本人的话，中间一条发丝竖线。
+   这样横竖都用满，不靠留白撑高度——只竖着排的话下半屏会空。
+   ⚠️ 满屏区不套 <section> 的默认内外边距，故外层 .panels 把 padding 清零，
+      每条 .panel 自己带 border-top，避免出现双线。 */
+.panels {
+  padding: 0;
+  border-top: 0;
+  scroll-margin-top: 0;   /* 锚点跳转时贴齐屏顶：导航的位置已由 .panel 的上内边距让开 */
 }
 
-.focus-list li {
-  border-top: 1px solid var(--hairline);
-  transition: opacity 0.25s linear;
-}
-
-.focus-list li:last-child {
-  border-bottom: 1px solid var(--hairline);
-}
-
-.focus-list:hover li { opacity: 0.22; }
-.focus-list li:hover { opacity: 1; }
-
-.focus-list a {
+.panel {
+  min-height: 100vh;
+  min-height: 100svh;     /* 手机上避开地址栏伸缩导致的高度跳动 */
   display: flex;
+  flex-direction: column;
+  padding: 5.5rem clamp(1.4rem, 5vw, 4rem) clamp(2rem, 5vh, 3.2rem);
+  border-top: 1px solid var(--hairline);
+}
+
+.panel-top {
+  display: flex;
+  justify-content: space-between;
   align-items: baseline;
-  gap: clamp(1.2rem, 3vw, 3rem);
-  padding: clamp(1.4rem, 3.2vh, 2.2rem) 0;
 }
 
-.focus-list .idx {
-  font-size: 0.78rem;   /* 与「关于」信息条的小标签同号 */
-  font-weight: 600;
-  letter-spacing: 0.2em;
-  color: var(--white-faint);
-  min-width: 2.4rem;
-}
-
-.focus-list .zh {
-  font-size: clamp(1.8rem, 4.5vw, 3.6rem);
+.panel-top .rhead {
+  font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
 }
 
-.focus-list .en {
-  margin-left: auto;
-  font-size: 0.78rem;   /* 与「关于」信息条的小标签同号 */
+.panel-top .pnum {
+  font-size: 0.68rem;
   font-weight: 600;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.24em;
+  color: var(--white-faint);
+}
+
+/* margin:auto 0 —— 上下留白自动均分，中区始终垂直居中 */
+.panel-mid { margin: auto 0; }
+
+.panel-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(2rem, 6vw, 6rem);
+  align-items: center;
+}
+
+.panel-row h3 {
+  font-size: clamp(2.4rem, 5.4vw, 4.6rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.04;
+}
+
+.panel-row .en {
+  margin-top: 1.1rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
   color: var(--white-faint);
-  text-align: right;
+}
+
+.panel-say {
+  border-left: 1px solid var(--hairline);
+  padding-left: clamp(1.6rem, 3.4vw, 3rem);
+  font-size: clamp(1rem, 1.3vw, 1.12rem);
+  line-height: 1.9;
+  color: var(--white-dim);
+}
+
+/* alone：还没写感想时的形态——单栏，大字放到最大独占整屏。
+   这样右半屏不是「空着」，而是本来就这么排；感想写好后去掉 alone 即回左右分栏。 */
+.panel-row.alone { grid-template-columns: 1fr; }
+.panel-row.alone h3 { font-size: clamp(2.6rem, 7.4vw, 6.4rem); }
+
+.panel-foot {
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--white-faint);
 }
 
 /* ---------- 8. 项目 / 笔记：年份 + 标题的横向条目 ---------- */
@@ -506,12 +545,33 @@ footer {
   }
 
   .project .year { padding-top: 0; }
+
+  /* 窄屏：满屏取消。内容会溢出屏幕，硬撑成一屏反而难读 */
+  .panel {
+    min-height: 0;
+    padding-top: 4.5rem;
+    padding-bottom: 3.5rem;
+  }
+
+  .panel-mid { margin: 2.5rem 0 0; }
+
+  /* 左右分栏落成上下单栏，发丝竖线改成横线 */
+  .panel-row { grid-template-columns: 1fr; gap: 2rem; }
+
+  .panel-say {
+    border-left: 0;
+    padding-left: 0;
+    border-top: 1px solid var(--hairline);
+    padding-top: 2rem;
+  }
+
+  .panel-row h3 { font-size: clamp(1.9rem, 6vw, 3rem); }
 }
 
 @media (max-width: 640px) {
   .hero { padding-top: 5rem; }
   .hero-scroll { display: none; }
-  .focus-list .en { display: none; }
+  .panel-foot { display: none; }
   footer {
     flex-direction: column;
     gap: 0.5rem;
