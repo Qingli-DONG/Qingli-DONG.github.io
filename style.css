@@ -392,6 +392,60 @@ section {
 .panel-row.alone { grid-template-columns: 1fr; }
 .panel-row.alone h3 { font-size: clamp(2.6rem, 7.4vw, 6.4rem); }
 
+/* 右栏白块：蓝场里嵌一块白，与「关于」棋盘格的配色同一套（蓝底上的白格）。
+   里面放图 + 图例 + 出处；文字用蓝而非白，因为底已经是白的。 */
+.panel-fig {
+  margin: 0;
+  background: var(--white);
+  padding: clamp(1.1rem, 2.2vw, 1.7rem);
+}
+
+.panel-fig .fig-cap {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--klein);
+  margin-bottom: 0.8rem;
+}
+
+.panel-fig .fig-cap span {
+  color: rgba(0, 47, 167, 0.42);
+}
+
+.panel-fig img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.panel-fig .fig-lg {
+  margin-top: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.panel-fig .fig-lg i {
+  width: 1.1rem;
+  height: 0.6rem;
+  display: block;
+}
+
+.panel-fig .fig-lg .lo,
+.panel-fig .fig-lg .hi {
+  font-size: 0.6rem;
+  font-variant-numeric: tabular-nums;
+  color: rgba(0, 47, 167, 0.55);
+}
+
+.panel-fig .fig-note {
+  margin-top: 0.5rem;
+  font-size: 0.6rem;
+  line-height: 1.7;
+  color: rgba(0, 47, 167, 0.45);
+}
+
 .panel-foot {
   font-size: 0.64rem;
   font-weight: 600;
