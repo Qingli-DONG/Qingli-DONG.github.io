@@ -363,14 +363,17 @@ section {
   align-items: center;
 }
 
-.panel-row h3 {
-  font-size: clamp(2.4rem, 5.4vw, 4.6rem);
+/* 板内大字。左右对开时它只占左半边，字号不能顶到满屏那一档：
+   上限 3rem 是对着「企业出海与对外直接投资」12 字算的——
+   1440 屏对开时左栏净宽约 611px，12 x 48px = 576px，刚好一行不折。 */
+.panel h3 {
+  font-size: clamp(1.9rem, 3.6vw, 3rem);
   font-weight: 800;
   letter-spacing: -0.03em;
-  line-height: 1.04;
+  line-height: 1.06;
 }
 
-.panel-row .en {
+.panel .en {
   margin-top: 1.1rem;
   font-size: 0.82rem;
   font-weight: 600;
@@ -392,12 +395,31 @@ section {
 .panel-row.alone { grid-template-columns: 1fr; }
 .panel-row.alone h3 { font-size: clamp(2.6rem, 7.4vw, 6.4rem); }
 
-/* 右栏白块：蓝场里嵌一块白，与「关于」棋盘格的配色同一套（蓝底上的白格）。
-   里面放图 + 图例 + 出处；文字用蓝而非白，因为底已经是白的。 */
+/* ---- 左右对开：左半蓝、右半白，各自通到屏幕边缘 ----
+   白如果只是一块卡在蓝场里的小方块，四边都留着蓝边，就会读成「贴上去的」。
+   改成对开之后白自己占满半屏，不再有「嵌入」感——白也自然多出一大块。
+   左栏收 .panel 的三区结构（顶标签 / 中区 / 底落款），右栏整块交给 .panel-fig。 */
+.panel-split {
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.panel-split > .col-blue {
+  display: flex;
+  flex-direction: column;
+  padding: 5.5rem clamp(1.4rem, 4vw, 3.4rem) clamp(2rem, 5vh, 3.2rem);
+}
+
+/* 右栏白块：里面放图 + 图例 + 出处，垂直居中，上下留白由它自己吃掉。
+   文字用蓝而非白，因为底已经是白的。 */
 .panel-fig {
   margin: 0;
   background: var(--white);
-  padding: clamp(1.1rem, 2.2vw, 1.7rem);
+  padding: clamp(1.8rem, 3.4vw, 3.4rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .panel-fig .fig-cap {
@@ -609,7 +631,16 @@ footer {
 
   .panel-mid { margin: 2.5rem 0 0; }
 
-  /* 左右分栏落成上下单栏，发丝竖线改成横线 */
+  /* 对开落成上下：蓝在上、白在下，白块自己带上边距 */
+  .panel-split { grid-template-columns: 1fr; }
+  .panel-split > .col-blue {
+    padding-bottom: 2.5rem;
+  }
+  .panel-fig {
+    padding: clamp(1.2rem, 4vw, 2rem);
+  }
+
+  /* 左右分栏落成上下单栏时，发丝竖线改成横线 */
   .panel-row { grid-template-columns: 1fr; gap: 2rem; }
 
   .panel-say {
@@ -619,7 +650,8 @@ footer {
     padding-top: 2rem;
   }
 
-  .panel-row h3 { font-size: clamp(1.9rem, 6vw, 3rem); }
+  .panel h3 { font-size: clamp(1.6rem, 5.4vw, 2.2rem); }
+  .panel-row.alone h3 { font-size: clamp(2rem, 9vw, 3.2rem); }
 }
 
 @media (max-width: 640px) {
