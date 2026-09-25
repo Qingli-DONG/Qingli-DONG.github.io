@@ -245,36 +245,72 @@ section {
   color: var(--white-faint);
 }
 
-/* ---------- 6. 关于：个人信息档案 ---------- */
-/* 全节只有信息、不写散文。发丝线之上，「小标签 + 值」两行式；
-   自适应网格，宽屏多列、窄屏自动落单列 */
+/* ---------- 6. 关于：蓝白棋盘格 ---------- */
+/* 蓝格与白格交替拼接（奇白、偶蓝），同色永不相邻。
+   ⚠️ 列数必须为奇数：宽屏 3 列、窄屏 1 列。
+   按奇偶着色时，奇数列才能保证任意换行都不出现同色上下相接；
+   若改成 4 列等偶数，第二行会落到与第一行同色的格子上，棋盘即破。
+   格子高度由内容决定（min-height 封顶），不用 aspect-ratio——
+   否则窄屏单列时格子会被撑成整屏宽的正方形，整节变成几千像素的空方阵。 */
 .about-info {
   margin-top: clamp(1.6rem, 3.5vh, 2.4rem);
-  padding-top: clamp(1.2rem, 2.6vh, 1.8rem);
-  border-top: 1px solid var(--hairline);
   display: grid;
-  /* 列宽给到 18rem：字号放大后，邮箱那一项仍能整行放下不被截断 */
-  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
-  gap: clamp(1.3rem, 3vh, 2rem) clamp(1.6rem, 4vw, 3.4rem);
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+}
+
+@media (max-width: 720px) {
+  .about-info { grid-template-columns: 1fr; }
 }
 
 .about-info .meta-item {
-  font-size: 1.15rem;          /* 原 0.85rem，正文级 */
+  min-height: clamp(8rem, 12vw, 9.5rem);
+  padding: clamp(1.4rem, 2.6vw, 2rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;   /* 标签靠上、内容靠下 */
+  font-size: 1.05rem;
   line-height: 1.5;
-  color: var(--white-dim);
-  overflow-wrap: anywhere;     /* 极窄屏兜底：长邮箱宁可折行也不溢出格子 */
+  overflow-wrap: anywhere;          /* 长邮箱在格子内折行，不溢出 */
+  transition: background 0.25s ease, color 0.25s ease;
 }
 
-/* 信息条的小标签：小字号 + 宽字距，与全站标签语汇一致 */
+/* 格子的小标签：小字号 + 宽字距，与全站标签语汇一致 */
 .about-info .meta-item b {
   display: block;
-  font-size: 0.78rem;          /* 原 0.62rem，随正文一起放大 */
+  font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--white-faint);
-  margin-bottom: 0.45rem;
+  margin-bottom: 0.9rem;
 }
+
+/* 奇数格：白底蓝字 */
+.about-info .meta-item:nth-child(odd) {
+  background: var(--white);
+  color: rgba(0, 47, 167, 0.82);
+}
+.about-info .meta-item:nth-child(odd) b { color: rgba(0, 47, 167, 0.5); }
+
+/* 偶数格：蓝底白字（与页面同蓝，用内描边勾出格子边界） */
+.about-info .meta-item:nth-child(even) {
+  color: var(--white-dim);
+  box-shadow: inset 0 0 0 1px var(--hairline);
+}
+.about-info .meta-item:nth-child(even) b { color: var(--white-faint); }
+
+/* 悬停时格子瞬间反色，蓝白互换 */
+.about-info .meta-item:nth-child(odd):hover {
+  background: var(--klein);
+  color: var(--white);
+}
+.about-info .meta-item:nth-child(odd):hover b { color: var(--white-faint); }
+.about-info .meta-item:nth-child(even):hover {
+  background: var(--white);
+  color: rgba(0, 47, 167, 0.82);
+  box-shadow: none;
+}
+.about-info .meta-item:nth-child(even):hover b { color: rgba(0, 47, 167, 0.5); }
 
 /* ---------- 7. 研究兴趣：大字列表 + 悬停聚焦 ---------- */
 .focus-list {
