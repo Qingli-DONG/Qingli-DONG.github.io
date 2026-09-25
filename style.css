@@ -183,34 +183,7 @@ nav {
   justify-content: flex-end;
 }
 
-/* 关于页的个人信息档案：发丝线之上，「小标签 + 值」两行式
-   8 项信息用自适应网格排布，窄屏自动落到单列 */
-.about-info {
-  margin-top: clamp(2.2rem, 5vh, 3.2rem);
-  padding-top: clamp(1.2rem, 2.6vh, 1.8rem);
-  border-top: 1px solid var(--hairline);
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-  gap: clamp(1.2rem, 2.6vh, 1.8rem) clamp(1.6rem, 4vw, 3.4rem);
-}
-
-.about-info .meta-item {
-  font-size: 0.85rem;
-  color: var(--white-dim);
-}
-
-/* 信息条的小标签：小字号 + 宽字距，与全站标签语汇一致 */
-.about-info .meta-item b {
-  display: block;
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--white-faint);
-  margin-bottom: 0.35rem;
-}
-
-/* 滚动提示改为底区右端的小标签，不再绝对定位（否则会压住信息条） */
+/* 滚动提示改为底区右端的小标签，不再绝对定位 */
 .hero-scroll {
   margin-left: auto;
   font-size: 0.64rem;
@@ -272,20 +245,32 @@ section {
   color: var(--white-faint);
 }
 
-/* ---------- 6. 关于 ---------- */
-/* 定位句：一句话说清身份与方向，字号收到正文级（原 clamp 上限 2.1rem＝约 34px，过大） */
-.about .about-lead {
-  max-width: 40rem;
-  font-size: clamp(1.05rem, 1.7vw, 1.35rem);
-  line-height: 1.75;
-  font-weight: 500;
-  letter-spacing: -0.005em;
+/* ---------- 6. 关于：个人信息档案 ---------- */
+/* 全节只有信息、不写散文。发丝线之上，「小标签 + 值」两行式；
+   自适应网格，宽屏多列、窄屏自动落单列 */
+.about-info {
+  margin-top: clamp(1.6rem, 3.5vh, 2.4rem);
+  padding-top: clamp(1.2rem, 2.6vh, 1.8rem);
+  border-top: 1px solid var(--hairline);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: clamp(1.2rem, 2.6vh, 1.8rem) clamp(1.6rem, 4vw, 3.4rem);
 }
 
-/* 句中压暗的关键词 */
-.about .about-lead em {
-  font-style: normal;
+.about-info .meta-item {
+  font-size: 0.85rem;
+  color: var(--white-dim);
+}
+
+/* 信息条的小标签：小字号 + 宽字距，与全站标签语汇一致 */
+.about-info .meta-item b {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
   color: var(--white-faint);
+  margin-bottom: 0.35rem;
 }
 
 /* ---------- 7. 研究兴趣：大字列表 + 悬停聚焦 ---------- */
