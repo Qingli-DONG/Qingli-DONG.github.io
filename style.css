@@ -301,7 +301,7 @@ section {
 }
 
 .focus-list .idx {
-  font-size: 0.72rem;
+  font-size: 0.78rem;   /* 与「关于」信息条的小标签同号 */
   font-weight: 600;
   letter-spacing: 0.2em;
   color: var(--white-faint);
@@ -317,7 +317,7 @@ section {
 
 .focus-list .en {
   margin-left: auto;
-  font-size: 0.72rem;
+  font-size: 0.78rem;   /* 与「关于」信息条的小标签同号 */
   font-weight: 600;
   letter-spacing: 0.2em;
   text-transform: uppercase;
